@@ -1,291 +1,431 @@
+
+
 # From Whispers to Voices: A "Community-In-The-Loop" Proposal for Model Distillation and Language Preservation
 
-A working model of the Stoney Nakoda has been developed, is working, and is now available for the community-in-the-loop approach to be tested in 2025.
+A working model of the Stoney Nakoda language has been developed and is now available for community-in-the-loop testing in 2025:
 
-Here is the model: https://huggingface.co/spaces/HarleyCooper/StoneyApp
+- **Model App**: [Stoney Language Model App](https://huggingface.co/spaces/HarleyCooper/StoneyApp)  
+- **Training Data**: [StoneyNakoda Training Dataset](https://huggingface.co/datasets/HarleyCooper/StoneyNakoda/blob/main/zSTONEY1_TRAINING_SET.jsonl)
 
-You can find the training datasets on Hugging Face here: https://huggingface.co/datasets/HarleyCooper/StoneyNakoda/blob/main/zSTONEY1_TRAINING_SET.jsonl
+Any First Nations community seeking to apply this approach to their own language is warmly invited to reach out.
 
-I invite any First Nations community who would like this applied to their language to reach out. 
+By following this code, you can build a model for any low-resource language. The starting dictionary—minimum ~8,000 words—remains critical.
 
-By following this code, you can build your own model of any low-resource language in the world. The starting dictionary is the most important part of this process and can start with as few as 8,000 words. 
+---
 
+## Table of Contents
 
+1. [Opening Narratives](#opening-narratives)  
+2. [Project Architecture](#project-architecture)  
+   - [High-Level System Design](#high-level-system-design)  
+   - [Data Flow](#data-flow)  
+3. [Detailed Project Structure](#detailed-project-structure)  
+4. [Core Components](#core-components)  
+5. [Comprehensive Setup Instructions](#comprehensive-setup-instructions)  
+6. [Detailed Usage Pipeline](#detailed-usage-pipeline)  
+   1. [Generate Training Data](#1-generate-training-data)  
+   2. [Prepare Fine-tuning Data](#2-prepare-fine-tuning-data)  
+   3. [Fine-tune Model](#3-fine-tune-model)  
+7. [Advanced Model Configuration](#advanced-model-configuration)  
+   - [OpenAI Models](#openai-models)  
+   - [Google Gemini](#google-gemini)  
+   - [Hyperparameters](#hyperparameters)  
+8. [Comprehensive Data Formats](#comprehensive-data-formats)  
+   - [Dictionary Format](#dictionary-format)  
+   - [Q&A Format](#qa-format)  
+   - [OpenAI Training Format](#openai-training-format)  
+9. [Development Guidelines](#development-guidelines)  
+10. [Contributing](#contributing)  
+11. [License](#license)  
+12. [Acknowledgments](#acknowledgments)  
+13. [The Community-in-the-Loop Revolution](#the-community-in-the-loop-revolution)  
+    - [Introduction](#introduction)  
+    - [Conceptual Overview](#conceptual-overview)  
+    - [Heart of the Approach](#heart-of-the-approach)  
+    - [LoRA Fine-Tuning](#lora-fine-tuning)  
+    - [Mathematical Foundations](#mathematical-foundations)  
+    - [Mermaid Diagram](#mermaid-diagram)  
+    - [Cultural Integrity](#cultural-integrity)  
+    - [Data Sources](#data-sources)  
+    - [Expanding the Concept](#expanding-the-concept)  
+    - [Adaptive Checkpoints](#adaptive-checkpoints)  
+    - [Archix Links](#archix-links)  
+    - [Example Workflow](#example-workflow)  
+    - [Monitoring & QA](#monitoring--qa)  
+    - [Future Directions](#future-directions)  
+    - [Glossary](#glossary)  
 
+---
 
-## Project Overview
+## Opening Narratives
 
-In my office, there is a murder; a map of one, at least. 
-
-The scientist George Mercer Dawson, cut a wide swath through the Bow Valley in the late 1800s, and fortunately for us, he also noted language on the British Columbia side. His map, richly colored and showing his version of the nuance and depth of the Pacific Coast First nations that was known at the time, is the color of a tombstone over the Bow Valley. 
+In my office, there is a murder; a map of one, at least.  
 
 ![Dawson's Map of the Bow Valley](Public/FullDawsonMap.jpg)
 
-We all intuitively understand how languages in geographic proximity blend and change over time, kind of like linguistic DNA. The hope for machine learning is that there are threads of the fine structure of lost language that can be chased back to their origins like chasing a dying creek back to its headwaters. 
+George Mercer Dawson explored the Bow Valley in the late 1800s, noting language on the British Columbia side. His map, though richly colored, stands like a tombstone over the Bow Valley where the Stoney people lived:
 
-But in the age of AI, the isolation of the Stoney language isn't a curse, and it might be the actual cure. 
+![Detail of Dawson Map](Public/dawsondetail.jpg)
 
-I have been thinking about how a model could be self-trained on a small set of 100% indigenous data and then be self taught to learn the fine structure of the broader Stoney Language for about 2 years. 
+Nearby languages blend like “linguistic DNA,” and machine learning could help trace faint threads of lost speech to their roots. Where some see isolation as a curse, in the age of AI, Stoney’s uniqueness is its strength.
 
-There were two key innovations: the model released by [Meta](https://www.reuters.com/technology/meta-releases-early-versions-its-llama-3-ai-model-2024-04-18/) on April 18th changed my thinking about what was possible, and the [OpenAI fine-tuning API](https://openai.com/index/api-model-distillation/) released in October were also key.
+For about two years, I considered how a model could self-train on a set of 100% indigenous data, refining its grasp of the broader Stoney Language. Two key releases influenced this:
 
-So I built it. The innovation here might be in thinking about how communities create dictionaries and subsequently fine-tune each iteration of the model.
+1. [Meta’s Llama-3 Model (April 18th, 2024)](https://www.reuters.com/technology/meta-releases-early-versions-its-llama-3-ai-model-2024-04-18/)  
+2. [OpenAI Fine-Tuning API (October 2024)](https://openai.com/index/api-model-distillation/)
 
-These weren't just educational tools—they were, unknowingly, perfect model prompts. Every chapter, every word, was a step toward fine-tuning a language model that could learn without interference from external biases or data. This code and mathematical methods will work on any First Nations language in Canada, or the world.
+Both gave me the push to build what’s presented here. The true innovation lies in how communities create dictionaries and then fine-tune each model iteration. Textbooks that the Stoney community created—intended as educational tools—became perfect model prompts, each chapter or word offering pure indigenous data devoid of external biases.
 
-Early in 2024, I uncovered a sketch made in the Summer of 1858 by James Hector. This sketch made me shift my thinking from the Stoney "People" to this Stoney "Woman". She saw the same mountains and rivers I do but experienced this world via an entirely different context. One that is about to be lost. 
+Early in 2024, a sketch by James Hector shifted my thinking from the Stoney “People” to a single Stoney “Woman” who saw these same mountains and rivers from a fading context. It inspired a final push to ensure the Community-In-The-Loop concept became a reality.
 
-Finding this made me dedicat a bit of extra time to getting this model working to make CIL possible. 
+A hundred years from now, strangers will live in our homes, and most of what we fret over won’t matter. As we fade, let’s remember “Stoney Woman” and every chance we have to preserve her language.  
+**I am available to help any nation with the code.**
 
-A hundred years from now, strangers we don't know will be living in all our homes, the things we think matter likely don't, and we too will fade to the long shadow of humans that spent a short time here. Think about Stoney Woman as you celebrate this New Year, and think about who you know among the First Nations who would be interested in developing this project for their own language. I am available to help any nation with the code. 
+---
 
 ## Project Architecture
 
-The code provided represents a complete pipeline for training and deploying a Stoney language model. The model has been successfully trained and is currently operational - although it is not 100% correct 100% of the time. That is the point as we develop the Community-In-The-Loop model further. You can access the deployed model here: https://huggingface.co/spaces/HarleyCooper/StoneyApp 
-
+This code forms a complete pipeline for training and deploying a Stoney model. It is fully functional—but not correct 100% of the time—and is designed to improve through Community-In-The-Loop feedback. Access the model here:  
+[Stoney Language Model App](https://huggingface.co/spaces/HarleyCooper/StoneyApp)
 
 ### High-Level System Design
-The system follows a modular architecture with distinct components for data processing, model training, and inference. The core architecture consists of:
 
-1. **Data Ingestion Layer**
-   - Handles raw dictionary and textbook data
-   - Normalizes input formats
-   - Validates data integrity
-
-2. **Processing Pipeline**
-   - Q&A pair generation
-   - Data augmentation
-   - Format conversion
-
-3. **Model Training Framework**
-   - Fine-tuning implementation
-   - Hyperparameter management
-   - Training monitoring
-
-4. **Inference Interface**
-   - API endpoint for model queries
-   - Response formatting
-   - Error handling
+1. **Data Ingestion Layer**  
+2. **Processing Pipeline** (Q&A generation, augmentation, conversion)  
+3. **Model Training Framework** (fine-tuning, hyperparameters, monitoring)  
+4. **Inference Interface** (API endpoint, response formatting, error handling)
 
 ### Data Flow
-1. Raw dictionary data → Data Ingestion Layer
-2. Processed data → Q&A Generation
-3. Generated Q&A pairs → Training Data Preparation
-4. Prepared data → Model Fine-tuning
-5. Fine-tuned model → Inference Interface
+
+1. Raw dictionary data → Data Ingestion  
+2. Processed data → Q&A Generation  
+3. Generated Q&A pairs → Training Data Preparation  
+4. Prepared data → Model Fine-tuning  
+5. Fine-tuned model → Inference Interface  
+
+---
 
 ## Detailed Project Structure
 
+
 ```
-PUBLICRELEASE/
-├── OpenAIFineTune/               # Directory for OpenAI fine-tuning files
-│   ├── stoney_train.jsonl        # Training dataset
-│   └── stoney_valid.jsonl        # Validation dataset
-├── checkpoints/                  # Model checkpoints directory
-├── .env.example                  # Example environment variables
-├── requirements.txt              # Python dependencies
-├── english_dictionary.jsonl      # English source dictionary
-├── stoney_dictionary.jsonl       # Stoney source dictionary
-└── bilingual_training_set.jsonl  # Generated training data
+
+PUBLICRELEASE/ ├── OpenAIFineTune/ # OpenAI fine-tuning files │ ├── stoney_train.jsonl # Training dataset │ └── stoney_valid.jsonl # Validation dataset ├── checkpoints/ # Model checkpoints ├── .env.example # Env variables example ├── requirements.txt # Python dependencies ├── english_dictionary.jsonl ├── stoney_dictionary.jsonl └── bilingual_training_set.jsonl
+
 ```
+
+---
 
 ## Core Components
 
-### Data Generation and Processing
-- `bilingual_qa_generator.py`: 
-  - Processes dictionary entries
-  - Implements advanced natural language generation techniques
-  - Includes data validation and error handling
-  - Generates diverse Q&A pairs through multiple strategies
+### Data Generation & Processing
 
-- `convert_data_format.py`:
-  - Supports multiple data formats (JSON, JSONL, CSV)
-  - Implements data validation
-  - Includes schema enforcement
-  - Handles large datasets efficiently
+- **`bilingual_qa_generator.py`**  
+  Generates Q&A pairs from dictionaries, using advanced language generation.
 
-- `finetunesetup.py`:
-  - Implements stratified sampling for train/validation split
-  - Includes data balancing techniques
-  - Handles data preprocessing
-  - Implements data versioning
+- **`convert_data_format.py`**  
+  Supports multiple data formats; validates and enforces schemas.
+
+- **`finetunesetup.py`**  
+  Splits data (80/20) with stratified sampling and prepares files.
 
 ### Model Training
-- `openai_finetune.py`:
-  - Implements fine-tuning with progress monitoring
-  - Includes error handling and retry logic
-  - Implements model checkpointing
-  - Includes detailed logging
-  - Supports multiple model configurations
+
+- **`openai_finetune.py`**  
+  Handles fine-tuning, error handling, checkpointing, and logging.
+
+---
 
 ## Comprehensive Setup Instructions
 
 ### System Requirements
-- Python 3.8+
-- 8GB RAM minimum (16GB recommended)
-- 10GB disk space
-- Stable internet connection
+
+- Python 3.8+  
+- 8GB+ RAM (16GB recommended)  
+- 10GB free disk space  
+- Stable internet connection  
 
 ### Environment Setup
+
 ```bash
 # Clone the repository
 git clone [repository-url]
 cd PUBLICRELEASE
 
-# Create and activate virtual environment (recommended)
+# Create and activate a virtual environment
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate  # Windows: venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
+
 ```
 
 ### Configuration
+
 ```bash
 # Copy example environment file
 cp .env.example .env
+# Provide OPENAI_API_KEY, GOOGLE_API_KEY in .env
 
-# Edit .env with your API keys
-# Required: OPENAI_API_KEY, GOOGLE_API_KEY
 ```
 
 ### Initialization
+
 ```bash
-# Run initialization script
 python initialize.py
+
 ```
+
+----------
 
 ## Detailed Usage Pipeline
 
 ### 1. Generate Training Data
+
 ```bash
 python bilingual_qa_generator.py
+
 ```
-This script:
-- Processes entries from english_dictionary.jsonl and stoney_dictionary.jsonl
-- Implements advanced natural language generation
-- Includes data validation and error handling
-- Generates diverse Q&A pairs through multiple strategies
-- Outputs to bilingual_training_set.jsonl
+
+-   Processes `english_dictionary.jsonl` & `stoney_dictionary.jsonl`
+-   Produces `bilingual_training_set.jsonl`
 
 ### 2. Prepare Fine-tuning Data
+
 ```bash
 python finetunesetup.py
+
 ```
-This script:
-- Converts Q&A pairs to OpenAI's format
-- Creates 80/20 train/validation split
-- Implements stratified sampling
-- Includes data balancing techniques
-- Outputs to OpenAIFineTune/stoney_train.jsonl and stoney_valid.jsonl
+
+-   Converts Q&A to OpenAI format
+-   Outputs `OpenAIFineTune/stoney_train.jsonl` & `stoney_valid.jsonl`
 
 ### 3. Fine-tune Model
+
 ```bash
 python openai_finetune.py
+
 ```
-This script:
-- Uploads training files to OpenAI
-- Implements fine-tuning with progress monitoring
-- Includes error handling and retry logic
-- Implements model checkpointing
-- Provides detailed logging
+
+-   Uploads files to OpenAI
+-   Monitors fine-tuning progress
+-   Implements checkpointing & logs
+
+----------
 
 ## Advanced Model Configuration
 
 ### OpenAI Models
-- Default: gpt-4o-2024-08-06
-- Alternative: gpt-3.5-turbo
-- Configure in .env: OPENAI_MODEL
+
+-   Default: `gpt-4o-2024-08-06`
+-   Alternative: `gpt-3.5-turbo`
+-   `.env`: `OPENAI_MODEL`
 
 ### Google Gemini
-- Default: gemini-2.0-exp
-- Configure in .env: GEMINI_MODEL
+
+-   Default: `gemini-2.0-exp`
+-   `.env`: `GEMINI_MODEL`
 
 ### Hyperparameters
-- Learning rate: 1e-5
-- Batch size: 32
-- Epochs: 3
-- Context window: 4096 tokens
+
+-   LR: `1e-5`
+-   Batch size: `32`
+-   Epochs: `3`
+-   Context window: `4096`
+
+----------
 
 ## Comprehensive Data Formats
 
 ### Dictionary Format
+
 ```json
 {
-    "english_word": "example",
-    "stoney_versions": [
-        {
-            "word": "...",
-            "grammatical_classification": "...",
-            "meaning": "..."
-        }
-    ]
+  "english_word": "example",
+  "stoney_versions": [
+    {
+      "word": "...",
+      "grammatical_classification": "...",
+      "meaning": "..."
+    }
+  ]
 }
+
 ```
 
 ### Q&A Format
+
 ```json
 {
-    "question": "How do you say X in Stoney?",
-    "answer": "The Stoney word for X is...",
-    "source_language": "english",
-    "generated_at": "timestamp"
+  "question": "How do you say X in Stoney?",
+  "answer": "The Stoney word for X is...",
+  "source_language": "english",
+  "generated_at": "timestamp"
 }
+
 ```
 
 ### OpenAI Training Format
+
 ```json
 {
-    "messages": [
-        {"role": "system", "content": "You are a bilingual Stoney-English language assistant..."},
-        {"role": "user", "content": "question"},
-        {"role": "assistant", "content": "answer"}
-    ]
+  "messages": [
+    {"role": "system", "content": "You are a bilingual Stoney-English assistant..."},
+    {"role": "user", "content": "question"},
+    {"role": "assistant", "content": "answer"}
+  ]
 }
+
 ```
+
+----------
 
 ## Development Guidelines
 
-### Code Style
-- PEP 8 compliance
-- Type hints for all functions
-- Docstrings for all public methods
-- Consistent naming conventions
+-   **Style**: PEP 8, type hints, docstrings, consistent naming
+-   **Testing**: Unit tests, integration tests, CI, coverage
+-   **Documentation**: Inline comments, usage examples, troubleshooting
 
-### Testing
-- Unit tests for all modules
-- Integration tests for core workflows
-- Continuous integration setup
-- Test coverage reporting
-
-### Documentation
-- Inline code comments
-- API documentation
-- Usage examples
-- Troubleshooting guide
+----------
 
 ## Contributing
 
-### Contribution Process
-1. Fork the repository
-2. Create a feature branch
-3. Implement changes
-4. Write tests
-5. Submit pull request
+1.  Fork, branch, implement changes, test
+2.  Submit a pull request
 
-### Code Review Guidelines
-- Clear commit messages
-- Small, focused changes
-- Proper documentation
-- Test coverage
+**Code Review**
+
+-   Clear commits, small changes, documentation, test coverage
+
+----------
 
 ## License
 
-This project is licensed under [LICENSE] - see the LICENSE file for details.
+Project licensed under [LICENSE]; see LICENSE file.
+
+----------
 
 ## Acknowledgments
 
-- Stoney Nakoda First Nation for language expertise and guidance
-- OpenAI and Google for AI model support
-- Contributors and maintainers
-- Academic advisors and linguistic experts
+-   **Stoney Nakoda First Nation**: Language expertise
+-   **OpenAI & Google**: AI model support
+-   **Contributors & Advisors**
+
+----------
+
+## The Community-in-the-Loop Revolution
+
+### Introduction
+
+We aim to preserve, refine, and resurrect endangered languages via AI. Minimal lexical data can evolve into a culturally rich digital speaker of Stoney Nakoda. This subverts assumptions that massive datasets are necessary, instead emphasizing:
+
+-   Iterative improvement with community feedback
+-   Narrative corrections (cultural context over simple dictionary entries)
+-   Low-Rank Adaptation (LoRA) for parameter-efficient fine-tuning
+
+### Conceptual Overview
+
+**Community-in-the-Loop Model Distillation**:
+
+1.  Start with a small dictionary/text set.
+2.  Prompt an initial model.
+3.  Let the community correct errors with storytelling and context, not just words.
+4.  LoRA-based fine-tuning absorbs these narrative corrections.
+5.  The model evolves iteratively, guided by cultural custodians.
+
+### Heart of the Approach
+
+-   **Intentional Errors**: Poke the model with tough or context-specific queries.
+-   **Narrative Corrections**: Rich cultural commentary instead of bare “right vs. wrong.”
+-   **Distillation Triplets**: (Prompt, Disallowed Reply, Narrative Reply).
+-   **Iterative Improvement**: If the model stumbles, revert and add more context.
+
+### LoRA Fine-Tuning
+
+LoRA attaches small, low-rank matrices to the base model. This dramatically reduces compute and speeds up retraining:
+
+-   **Efficiency**: Fraction of resources required vs. full retraining
+-   **Focused Updates**: Capturing the “essence” of new knowledge
+-   **Rapid Iterations**: Frequent refinement without heavy overhead
+
+### Mathematical Foundations
+
+If W0\mathbf{W}_0 is the base weight matrix, LoRA introduces ΔW=AB\Delta \mathbf{W} = \mathbf{A}\mathbf{B} with A∈Rd×r\mathbf{A} \in \mathbb{R}^{d \times r} and B∈Rr×k\mathbf{B} \in \mathbb{R}^{r \times k}, where r≪min⁡(d,k)r \ll \min(d,k). Loss functions track both linguistic and cultural accuracy (e.g., a “Cultural Authenticity Score”).
+
+### Mermaid Diagram
+
+```mermaid
+graph TD
+    A[Initial Model] --> B[Generate Response]
+    B --> C{Correct?}
+    C -->|No| D[Community Correction]
+    D --> E[Create Distillation Triplet]
+    E --> F[LoRA Fine-Tuning]
+    F --> A
+    C -->|Yes| G[Validation]
+
+```
+
+### Cultural Integrity
+
+Every correction preserves cultural norms—idioms, humor, oral traditions—and ensures the community wields control over the AI’s “mindset.”
+
+### Data Sources
+
+A 10,000-word Stoney Nakoda dictionary and community textbooks serve as seeds. Community feedback enriches this data over time, weaving historical memory into the model.
+
+### Expanding the Concept
+
+From a tiny dictionary to an AI that:
+
+-   **Understands context** (formal/informal usage)
+-   **Integrates cultural references** (stories, metaphors)
+-   **Remembers history** (ancestors, ceremonies, seasonal events)
+
+### Adaptive Checkpoints
+
+-   **Forward Progress**: Keep the new checkpoint if improved.
+-   **Reversion**: If degraded, roll back and increase context in corrections.
+-   **Convergence**: Repeat until stable authenticity and fluency metrics are met.
+
+### Archix Links
+
+-   **Archix Documentation**
+-   **Archix Whitepaper (Low-Resource Modeling)**
+-   **Archix Cultural Preservation Projects**
+
+### Example Workflow
+
+1.  **Prompt**: “How to say ‘taste slightly with the tip of your tongue’ in Stoney?”
+2.  **Model’s Flawed Reply**: “`supthîyach`” (incorrect).
+3.  **Community Correction**: Shares the correct phrase plus a story from childhood.
+4.  **Distillation Triplet**: (Prompt, Disallowed, Narrative).
+5.  **LoRA Fine-Tuning**: Model adjusts swiftly.
+6.  **Re-Evaluation**: Answers improve in subsequent queries.
+
+### Monitoring & QA
+
+-   **Cultural Authenticity Score (CAS)**
+-   **Linguistic Fluency** (perplexity, cross-entropy)
+-   **Validation Loops** (watch for regressions, revert if needed)
+
+### Future Directions
+
+-   **Oral Histories**: Model retells century-old stories.
+-   **Seasonal Knowledge**: Terms tied to ceremonies and ecological cycles.
+-   **Dialects/Accents**: Respecting sub-regional differences.
+-   **Educational Tools**: Interactive AI for language learning.
+-   **Ethical AI**: Centered on consent, community governance, cultural integrity.
+
+### Glossary
+
+-   **CAS**: Cultural Authenticity Score
+-   **Distillation Triplet**: (Prompt, Flawed Reply, Narrative Reply)
+-   **LoRA**: Low-Rank Adaptation
+-   **Community-in-the-Loop**: Paradigm of continuous human-guided refinement
+
+
+
+**Think about Stoney Woman**—her view of the rivers and mountains—and about any First Nations community that could benefit from preserving its language through this approach. **I am available to help any nation with the code.**
+
