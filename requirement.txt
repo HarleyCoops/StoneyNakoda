@@ -1,0 +1,22 @@
+# Core dependencies
+python-dotenv>=1.0.0  # For loading environment variables
+tqdm>=4.65.0         # For progress bars
+
+# OpenAI dependencies
+openai>=1.3.0        # For fine-tuning with OpenAI models
+
+# Google AI dependencies
+google-generativeai>=0.3.0  # For Gemini model
+google-cloud-storage>=2.10.0  # For Google Cloud storage
+
+# Data processing
+tensorflow>=2.13.0    # Core ML framework
+tensorflow-text>=2.13.0  # Text processing utilities
+torch>=2.0.0         # PyTorch for some model operations
+transformers>=4.30.0  # Hugging Face transformers
+
+# Utility packages
+numpy>=1.24.0        # Numerical operations
+pandas>=2.0.0        # Data manipulation
+requests>=2.31.0     # HTTP requests
+beautifulsoup4>=4.12.0  # Web scraping
