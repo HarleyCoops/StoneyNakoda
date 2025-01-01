@@ -6,7 +6,7 @@ In my office, there is a murder; a map of one, at least.
 
 The scientist George Mercer Dawson, cut a wide swath through the Bow Valley in the late 1800s, and fortunately for us, he also noted language on the British Columbia side. His map, richly colored and showing his version of the nuance and depth of the Pacific Coast First nations that was known at the time, is the color of a tombstone over the Bow Valley. 
 
-![Dawson's Map of the Bow Valley](public/FullDawsonMap.jpg)
+![Dawson's Map of the Bow Valley](Public/FullDawsonMap.jpg)
 
 We all intuitively understand how languages in geographic proximity blend and change over time, kind of like linguistic DNA. The hope for machine learning is that there are threads of the fine structure of lost language that can be chased back to their origins like chasing a dying creek back to its headwaters. 
 
