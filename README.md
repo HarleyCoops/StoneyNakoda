@@ -1,5 +1,18 @@
 # From Whispers to Voices: A "Community-In-The-Loop" Proposal for Model Distillation and Language Preservation
 
+A working model of the Stoney Nakoda has been developed, is working, and is now available for the community-in-the-loop approach to be tested in 2025.
+
+Here is the model: https://huggingface.co/spaces/HarleyCooper/StoneyApp
+
+You can find the training datasets on Hugging Face here: https://huggingface.co/datasets/HarleyCooper/StoneyNakoda/blob/main/zSTONEY1_TRAINING_SET.jsonl
+
+I invite any First Nations community who would like this applied to their language to reach out. 
+
+By following this code, you can build your own model of any low-resource language in the world. The starting dictionary is the most important part of this process and can start with as few as 8,000 words. 
+
+
+
+
 ## Project Overview
 
 In my office, there is a murder; a map of one, at least. 
@@ -12,19 +25,24 @@ We all intuitively understand how languages in geographic proximity blend and ch
 
 But in the age of AI, the isolation of the Stoney language isn't a curse, and it might be the actual cure. 
 
-I have been thinking about how a model could be self-trained on a small set of 100% indigenous data and then be self taught to learn the fine structure of the broader Stoney Language for about 2 years and a recent model release by Meta on April 18th changed my thinking about what was possible. So I built it. The innovation here might be in thinking about the textbooks the community has created. 
+I have been thinking about how a model could be self-trained on a small set of 100% indigenous data and then be self taught to learn the fine structure of the broader Stoney Language for about 2 years. 
 
-The real innovation isn't in the machine; it's in the textbooks that the Stoney community has painstakingly created over the years. These weren't just educational tools—they were, unknowingly, perfect model prompts. Every chapter, every word, was a step toward fine-tuning a language model that could learn without interference from external biases or data.
+There were two key innovations: the model released by [Meta](https://www.reuters.com/technology/meta-releases-early-versions-its-llama-3-ai-model-2024-04-18/) on April 18th changed my thinking about what was possible, and the [OpenAI fine-tuning API](https://openai.com/index/api-model-distillation/) released in October were also key.
 
-This is only possible because the community created a 10,000 word dictionary, and then also created textbooks. Both of those are required to train the model. I literally cut up the textbooks and separated the questions and answers. Then passed those questions through the dictionary enough times until the right answer comes out. 
+So I built it. The innovation here might be in thinking about how communities create dictionaries and subsequently fine-tune each iteration of the model.
 
-For the first time, an endangered language is being used to fine-tune its own model, a task only made possible because the community built a 10,000-word dictionary alongside their textbooks. Both were essential to train this model. When these textbooks are run back through their own dictionary, what emerges is a fluent, fine-tuned Stoney model. My role? To guide their data through the machine in the right format, nothing more.
+These weren't just educational tools—they were, unknowingly, perfect model prompts. Every chapter, every word, was a step toward fine-tuning a language model that could learn without interference from external biases or data. This code and mathematical methods will work on any First Nations language in Canada, or the world.
 
-In the code below, I have set up the data set, the StoneyTransformer and the Stony LLM functions are all built and working. 
+Early in 2024, I uncovered a sketch made in the Summer of 1858 by James Hector. This sketch made me shift my thinking from the Stoney "People" to this Stoney "Woman". She saw the same mountains and rivers I do but experienced this world via an entirely different context. One that is about to be lost. 
+
+Finding this made me dedicat a bit of extra time to getting this model working to make CIL possible. 
 
 A hundred years from now, strangers we don't know will be living in all our homes, the things we think matter likely don't, and we too will fade to the long shadow of humans that spent a short time here. Think about Stoney Woman as you celebrate this New Year, and think about who you know among the First Nations who would be interested in developing this project for their own language. I am available to help any nation with the code. 
 
 ## Project Architecture
+
+The code provided represents a complete pipeline for training and deploying a Stoney language model. The model has been successfully trained and is currently operational - although it is not 100% correct 100% of the time. That is the point as we develop the Community-In-The-Loop model further. You can access the deployed model here: https://huggingface.co/spaces/HarleyCooper/StoneyApp 
+
 
 ### High-Level System Design
 The system follows a modular architecture with distinct components for data processing, model training, and inference. The core architecture consists of:
