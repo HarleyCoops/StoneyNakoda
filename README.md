@@ -15,7 +15,7 @@ By following this code, you can build a model for any low-resource language. The
 
 ## Table of Contents
 
-1. [Opening Narratives](#opening-narratives)  
+1. [Introduction](#introduction)  
 2. [Project Architecture](#project-architecture)  
    - [High-Level System Design](#high-level-system-design)  
    - [Data Flow](#data-flow)  
