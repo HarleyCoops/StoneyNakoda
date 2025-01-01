@@ -15,7 +15,7 @@ By following this code, you can build a model for any low-resource language. The
 
 ## Table of Contents
 
-1. [Introduction](#introduction)  
+1. [Introduction](#Introduction)  
 2. [Project Architecture](#project-architecture)  
    - [High-Level System Design](#high-level-system-design)  
    - [Data Flow](#data-flow)  
@@ -49,7 +49,6 @@ By following this code, you can build a model for any low-resource language. The
     - [Data Sources](#data-sources)  
     - [Expanding the Concept](#expanding-the-concept)  
     - [Adaptive Checkpoints](#adaptive-checkpoints)  
-    - [Archix Links](#archix-links)  
     - [Example Workflow](#example-workflow)  
     - [Monitoring & QA](#monitoring--qa)  
     - [Future Directions](#future-directions)  
@@ -57,7 +56,7 @@ By following this code, you can build a model for any low-resource language. The
 
 ---
 
-## Opening Narratives
+## Introduction
 
 In my office, there is a murder; a map of one, at least.  
 
@@ -388,12 +387,6 @@ From a tiny dictionary to an AI that:
 -   **Forward Progress**: Keep the new checkpoint if improved.
 -   **Reversion**: If degraded, roll back and increase context in corrections.
 -   **Convergence**: Repeat until stable authenticity and fluency metrics are met.
-
-### Archix Links
-
--   **Archix Documentation**
--   **Archix Whitepaper (Low-Resource Modeling)**
--   **Archix Cultural Preservation Projects**
 
 ### Example Workflow
 
