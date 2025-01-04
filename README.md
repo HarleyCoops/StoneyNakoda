@@ -103,23 +103,23 @@ A word's position in this space isn't fixed—it shifts based on context. For in
 Cosine Similarity: Measuring Relationships
 Cosine similarity quantifies how similar two words are by measuring the angle between their vectors in the embedding space:
 
-    Similar words have vectors pointing in nearly the same direction (cosine similarity close to 1).
-    Unrelated words have vectors at a right angle (cosine similarity near 0).
-    Opposite meanings have vectors pointing in opposite directions (cosine similarity close to -1).
-    For example, "cherry" and "orange" might have a similarity of 0.97, while "cherry" and "laptop" might score 0.24.
+- Similar words have vectors pointing in nearly the same direction (cosine similarity close to 1)
+- Unrelated words have vectors at a right angle (cosine similarity near 0)
+- Opposite meanings have vectors pointing in opposite directions (cosine similarity close to -1)
+- For example, "cherry" and "orange" might have a similarity of 0.97, while "cherry" and "laptop" might score 0.24
 
 How AI Learns Stoney Words
 
-    Stoney Dictionary as a Starting Point:
-    The AI begins with a structured dictionary of Stoney words, including translations, categories, pronunciations, and cultural context.
+- **Stoney Dictionary as a Starting Point:**
+  The AI begins with a structured dictionary of Stoney words, including translations, categories, pronunciations, and cultural context.
 
-    Community Feedback for Learning:
-    The AI makes initial translations, which are often incorrect. Stoney speakers provide corrections, enriched with cultural context, stories, and humor. This feedback helps refine the AI’s understanding.
+- **Community Feedback for Learning:**
+  The AI makes initial translations, which are often incorrect. Stoney speakers provide corrections, enriched with cultural context, stories, and humor. This feedback helps refine the AI's understanding.
 
 The Role of Cosine Similarity in AI Learning
 
-    The AI uses word embeddings to group Stoney words based on their meaning. For example, it determines whether a word belongs to a category like "fruit," "animal," or "spiritual."
-    Community corrections and cosine similarity guide the AI in repositioning words closer to their accurate groupings in the embedding space.
+- The AI uses word embeddings to group Stoney words based on their meaning. For example, it determines whether a word belongs to a category like "fruit," "animal," or "spiritual."
+- Community corrections and cosine similarity guide the AI in repositioning words closer to their accurate groupings in the embedding space.
 
 Iterative Refinement
 Through repeated feedback and fine-tuning, the AI improves its ability to place Stoney words correctly, not just individually but in the context of sentences and paragraphs. Over time, it develops a detailed, dynamic map of the Stoney language, with words clustered according to their community-informed meanings and uses.
