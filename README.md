@@ -473,5 +473,3 @@ From a tiny dictionary to an AI that:
 
 
 
-**Think about Stoney Woman**—her view of the rivers and mountains—and about any First Nations community that could benefit from preserving its language through this approach. **I am available to help any nation with the code.**
-
