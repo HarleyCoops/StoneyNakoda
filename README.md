@@ -1,5 +1,3 @@
-
-
 # From Whispers to Voices: A "Community-In-The-Loop" Proposal for Model Distillation and Language Preservation
 
 A working model of the Stoney Nakoda language has been developed and is now available for community-in-the-loop testing in 2025:
@@ -15,31 +13,38 @@ By following this code, you can build a model for any low-resource language. The
 
 ## Table of Contents
 
-1. [Introduction](#Introduction)  
-2. [Project Architecture](#project-architecture)  
+1. [Introduction](#introduction)  
+2. [Understanding How AI Learns Stoney Words Using Cosine Similarity](#understanding-how-ai-learns-stoney-words-using-cosine-similarity)
+3. [Project Architecture](#project-architecture)  
    - [High-Level System Design](#high-level-system-design)  
    - [Data Flow](#data-flow)  
-3. [Detailed Project Structure](#detailed-project-structure)  
-4. [Core Components](#core-components)  
-5. [Comprehensive Setup Instructions](#comprehensive-setup-instructions)  
-6. [Detailed Usage Pipeline](#detailed-usage-pipeline)  
+4. [Detailed Project Structure](#detailed-project-structure)  
+5. [Core Components](#core-components)  
+   - [Data Generation & Processing](#data-generation--processing)
+   - [Model Training](#model-training)
+6. [Comprehensive Setup Instructions](#comprehensive-setup-instructions)  
+   - [System Requirements](#system-requirements)
+   - [Environment Setup](#environment-setup)
+   - [Configuration](#configuration)
+   - [Initialization](#initialization)
+7. [Detailed Usage Pipeline](#detailed-usage-pipeline)  
    1. [Generate Training Data](#1-generate-training-data)  
    2. [Prepare Fine-tuning Data](#2-prepare-fine-tuning-data)  
    3. [Fine-tune Model](#3-fine-tune-model)  
-7. [Advanced Model Configuration](#advanced-model-configuration)  
+8. [Advanced Model Configuration](#advanced-model-configuration)  
    - [OpenAI Models](#openai-models)  
    - [Google Gemini](#google-gemini)  
    - [Hyperparameters](#hyperparameters)  
-8. [Comprehensive Data Formats](#comprehensive-data-formats)  
+9. [Comprehensive Data Formats](#comprehensive-data-formats)  
    - [Dictionary Format](#dictionary-format)  
    - [Q&A Format](#qa-format)  
    - [OpenAI Training Format](#openai-training-format)  
-9. [Development Guidelines](#development-guidelines)  
-10. [Contributing](#contributing)  
-11. [License](#license)  
-12. [Acknowledgments](#acknowledgments)  
-13. [The Community-in-the-Loop Revolution](#the-community-in-the-loop-revolution)  
-    - [Introduction](#introduction)  
+10. [Development Guidelines](#development-guidelines)  
+11. [Contributing](#contributing)  
+12. [License](#license)  
+13. [Acknowledgments](#acknowledgments)  
+14. [The Community-in-the-Loop Revolution](#the-community-in-the-loop-revolution)  
+    - [Introduction](#introduction-1)  
     - [Conceptual Overview](#conceptual-overview)  
     - [Heart of the Approach](#heart-of-the-approach)  
     - [LoRA Fine-Tuning](#lora-fine-tuning)  
@@ -68,17 +73,59 @@ George Mercer Dawson explored the Bow Valley in the late 1800s, noting language 
 
 Nearby languages blend like “linguistic DNA,” and machine learning could help trace faint threads of lost speech to their roots. Where some see isolation as a curse, in the age of AI, Stoney’s uniqueness is its strength.
 
-For about two years, I considered how a model could self-train on a set of 100% indigenous data, refining its grasp of the broader Stoney Language. Two key releases influenced this:
+For about two years, I worked on the mathematics of how a model could self-train on a set of 100% indigenous data, refining its grasp of the broader Stoney Language. Two key releases influenced my thinking of what was possible:
 
 1. [Meta’s Llama-3 Model (April 18th, 2024)](https://www.reuters.com/technology/meta-releases-early-versions-its-llama-3-ai-model-2024-04-18/)  
 2. [OpenAI Fine-Tuning API (October 2024)](https://openai.com/index/api-model-distillation/)
 
-Both gave me the push to build what’s presented here. The true innovation lies in how communities create dictionaries and then fine-tune each model iteration. Textbooks that the Stoney community created—intended as educational tools—became perfect model prompts, each chapter or word offering pure indigenous data devoid of external biases.
+Both gave me the push to build what’s presented here. The true innovation lies in how communities create dictionaries and then fine-tune each model iteration. Textbooks that the Stoney community created—intended as educational tools—became perfect concept of a model prompts, each chapter or word offering pure indigenous data devoid of external biases. 
 
-Early in 2024, a sketch by James Hector shifted my thinking from the Stoney “People” to a single Stoney “Woman” who saw these same mountains and rivers from a fading context. It inspired a final push to ensure the Community-In-The-Loop concept became a reality.
+Early in 2023, I found an original, unpublished sketch by James Hector likely drawn in the summer of 1858 or 1859 along the Bow River in Southern Alberta:
 
-A hundred years from now, strangers will live in our homes, and most of what we fret over won’t matter. As we fade, let’s remember “Stoney Woman” and every chance we have to preserve her language.  
-**I am available to help any nation with the code.**
+![Sketch by James Hector of a Stoney Woman](Public/StoneyWoman.jpg)
+
+Finding this, and already aware of George Mercer Dawson's work on First Nation's language on the British Columbia side, this inspired a final push to ensure the Community-In-The-Loop concept became a reality.
+
+This sketch shifted my thinking from considering the Stoney “People” to this Stoney “Woman” who saw these same mountains and rivers I see everyday, who had a very different cultural relationship with the environment and how AI could "bootstrap" a working model of the Stoney language simply from a small set of words. The Community-in-the-Loop model distillation will quickly converge this initial model toward fluencey. I suspect this will require the community to correct about 80,000 question and answer pairs. 
+
+I think what this project as left me with is the sense that a hundred years from now, strangers will live in our homes, and most of what we worry over won’t matter. As the year draws to a close, let’s remember “Stoney Woman” and seize this new technology to ensure this language is permanently preserved and owned by, the community itself. 
+
+**I am available to help any nation in Canada or the United States with the code.**
+
+## Understanding How AI Learns Stoney Words Using Cosine Similarity
+
+Word Embeddings: Mapping Words in Space
+Word embeddings are like placing words in a high-dimensional map, where similar words are positioned closer together. For example, "strawberry," "orange," and "cherry" might form a cluster because they are fruits, while "laptop," "Microsoft," and "Android" might cluster elsewhere as tech-related terms. Each axis in this space represents a characteristic of the words, such as their context or meaning.
+
+Context Shapes Meaning
+A word's position in this space isn't fixed—it shifts based on context. For instance, the word "apple" could mean a fruit or the tech brand, depending on its surrounding words, like "buy" (tech) or "tree" (fruit). This dynamic placement captures the nuances of meaning.
+
+Cosine Similarity: Measuring Relationships
+Cosine similarity quantifies how similar two words are by measuring the angle between their vectors in the embedding space:
+
+    Similar words have vectors pointing in nearly the same direction (cosine similarity close to 1).
+    Unrelated words have vectors at a right angle (cosine similarity near 0).
+    Opposite meanings have vectors pointing in opposite directions (cosine similarity close to -1).
+    For example, "cherry" and "orange" might have a similarity of 0.97, while "cherry" and "laptop" might score 0.24.
+
+How AI Learns Stoney Words
+
+    Stoney Dictionary as a Starting Point:
+    The AI begins with a structured dictionary of Stoney words, including translations, categories, pronunciations, and cultural context.
+
+    Community Feedback for Learning:
+    The AI makes initial translations, which are often incorrect. Stoney speakers provide corrections, enriched with cultural context, stories, and humor. This feedback helps refine the AI’s understanding.
+
+The Role of Cosine Similarity in AI Learning
+
+    The AI uses word embeddings to group Stoney words based on their meaning. For example, it determines whether a word belongs to a category like "fruit," "animal," or "spiritual."
+    Community corrections and cosine similarity guide the AI in repositioning words closer to their accurate groupings in the embedding space.
+
+Iterative Refinement
+Through repeated feedback and fine-tuning, the AI improves its ability to place Stoney words correctly, not just individually but in the context of sentences and paragraphs. Over time, it develops a detailed, dynamic map of the Stoney language, with words clustered according to their community-informed meanings and uses.
+
+Although this is not cosine similarity, you can see the relationships among words can concepts in Stoney as I have mapped them here: https://atlas.nomic.ai/data/harleycoops/stoney-nakoda-language-synthetic/map/5c87caaf-6be0-4546-9e83-826569070b24#nqlL
+
 
 ---
 
