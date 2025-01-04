@@ -153,11 +153,17 @@ This code forms a complete pipeline for training and deploying a Stoney model. I
 
 ## Detailed Project Structure
 
-
 ```
-
-PUBLICRELEASE/ ├── OpenAIFineTune/ # OpenAI fine-tuning files │ ├── stoney_train.jsonl # Training dataset │ └── stoney_valid.jsonl # Validation dataset ├── checkpoints/ # Model checkpoints ├── .env.example # Env variables example ├── requirements.txt # Python dependencies ├── english_dictionary.jsonl ├── stoney_dictionary.jsonl └── bilingual_training_set.jsonl
-
+PUBLICRELEASE/
+├── OpenAIFineTune/           # OpenAI fine-tuning files
+│   ├── stoney_train.jsonl    # Training dataset
+│   └── stoney_valid.jsonl    # Validation dataset
+├── checkpoints/              # Model checkpoints
+├── .env.example             # Env variables example
+├── requirements.txt         # Python dependencies
+├── english_dictionary.jsonl
+├── stoney_dictionary.jsonl
+└── bilingual_training_set.jsonl
 ```
 
 ---
