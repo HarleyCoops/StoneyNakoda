@@ -5,7 +5,8 @@ A working model of the Stoney Nakoda language has been developed and is now avai
 - **Model App**: [Stoney Language Model App](https://huggingface.co/spaces/HarleyCooper/StoneyApp)  
 - **Training Data**: [StoneyNakoda Training Dataset](https://huggingface.co/datasets/HarleyCooper/StoneyNakoda/blob/main/zSTONEY1_TRAINING_SET.jsonl)
 
-Any First Nations community seeking to apply this approach to their own language is warmly invited to reach out.
+
+Any First Nations community seeking to apply this approach to their own language is warmly invited to reach out. 
 
 By following this code, you can build a model for any low-resource language. The starting dictionary—minimum ~8,000 words—remains critical.
 
@@ -13,7 +14,7 @@ By following this code, you can build a model for any low-resource language. The
 
 ## Table of Contents
 
-1. [Introduction](#introduction)  
+1. [New Years Day, Canadian Rockies, 2025](#introduction)  
 2. [Understanding How AI Learns Stoney Words Using Cosine Similarity](#understanding-how-ai-learns-stoney-words-using-cosine-similarity)
 3. [Project Architecture](#project-architecture)  
    - [High-Level System Design](#high-level-system-design)  
