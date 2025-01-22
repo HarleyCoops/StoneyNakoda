@@ -14,7 +14,7 @@ By following this code, you can build a model for any low-resource language. The
 
 
 <div align="center">
-<a href="https://huggingface.co/spaces/HarleyCooper/AskAboutCIL" target="_blank">Ask Google What This is About</a>
+<a href="https://huggingface.co/spaces/HarleyCooper/AskAboutCIL" target="_blank">Ask Google What This is About (opens in new tab)</a>
 </div>
 
 
@@ -84,17 +84,17 @@ George Mercer Dawson explored the Bow Valley in the late 1800s as a geologist bu
 
 ![Detail of Dawson Map](Public/dawsondetail.jpg)
 
-What is very obvious from the linguistic patterns among the Haida, Tshimsia, Thlinkit, Kwakiool and Kawitshin dialects nearby is that languages blend like “linguistic DNA,” and machine learning could help trace faint threads of lost speech to their roots. Where some see isolation as a curse, in the age of AI, Stoney’s isolation turns out to be its strength.
+What is very obvious from the linguistic patterns among the Haida, Tshimsia, Thlinkit, Kwakiool and Kawitshin dialects nearby is that languages blend like "linguistic DNA," and machine learning could help trace faint threads of lost speech to their roots. Where some see isolation as a curse, in the age of AI, Stoney's isolation turns out to be its strength.
 
 For about two years, I thought about the size of the vector space that would be needed to get a model to self-train on a set of 100% indigenous data, and how that model could refine its grasp of the broader Stoney Language. This is now publicly and freely available. 
 
 
 Two key releases influenced my thinking of what was possible:
 
-1. [Meta’s Llama-3 Model (April 18th, 2024)](https://www.reuters.com/technology/meta-releases-early-versions-its-llama-3-ai-model-2024-04-18/)  
+1. [Meta's Llama-3 Model (April 18th, 2024)](https://www.reuters.com/technology/meta-releases-early-versions-its-llama-3-ai-model-2024-04-18/)  
 2. [OpenAI Fine-Tuning API (October 2024)](https://openai.com/index/api-model-distillation/)
 
-Both gave me the motivation to build what’s presented here. The true innovation here lies in how communities can narratively correct the initially flawed response (about 10% of the time, the model works every time.) then that feeback be passed seamleslly back into the fine-tuning process. The [textbooks](https://globalnews.ca/news/9430501/stoney-nakota-language-textbook/) that the Stoney community created—intended as educational tools—became perfect concept of a model prompts, each chapter or word offering pure indigenous data devoid of external weights or biases to the fine-tuning process.
+Both gave me the motivation to build what's presented here. The true innovation here lies in how communities can narratively correct the initially flawed response (about 10% of the time, the model works every time.) then that feeback be passed seamleslly back into the fine-tuning process. The [textbooks](https://globalnews.ca/news/9430501/stoney-nakota-language-textbook/) that the Stoney community created—intended as educational tools—became perfect concept of a model prompts, each chapter or word offering pure indigenous data devoid of external weights or biases to the fine-tuning process.
 
 
 Early in 2023, I found an original, unpublished sketch by James Hector likely drawn in the summer of 1858 or 1859 along the Bow River in Southern Alberta:
@@ -103,9 +103,9 @@ Early in 2023, I found an original, unpublished sketch by James Hector likely dr
 
 Finding this, and already aware of George Mercer Dawson's work on First Nation's language on the British Columbia side, I was inspired to put the effort in and build a working model of the language and implement the Community-In-The-Loop distillation method.
 
-This sketch shifted my thinking from considering the "Stoney People” to this "Stoney Woman” who saw these same mountains and rivers I see everyday, yet who had a very different way to think about and communicate to the world around her.  The Community-in-the-Loop model distillation will quickly converge this initial model toward fluencey. I suspect this will require the community to correct about 80,000 question and answer pairs and would cost less than $800 in OpenAI computing power. Recent releases by Google and the Chinese Lab DeepSeek, could effectively reduce the cost to zero.  
+This sketch shifted my thinking from considering the "Stoney People" to this "Stoney Woman" who saw these same mountains and rivers I see everyday, yet who had a very different way to think about and communicate to the world around her.  The Community-in-the-Loop model distillation will quickly converge this initial model toward fluencey. I suspect this will require the community to correct about 80,000 question and answer pairs and would cost less than $800 in OpenAI computing power. Recent releases by Google and the Chinese Lab DeepSeek, could effectively reduce the cost to zero.  
 
-I think what this project has left me considering most ist that a century from now, strangers will live in all our homes and most of what we worry about today will not matter. But we can honor “Stoney Woman” by making sure her language endures, forging a living record in an age of AI. Incredibly, this tool will work with any first nations language, as long as there is a starting dictionary of about 8,000 words. 
+I think what this project has left me considering most ist that a century from now, strangers will live in all our homes and most of what we worry about today will not matter. But we can honor "Stoney Woman" by making sure her language endures, forging a living record in an age of AI. Incredibly, this tool will work with any first nations language, as long as there is a starting dictionary of about 8,000 words. 
 
 **I am freely available to help any First Nation in Canada.**
 
@@ -392,7 +392,7 @@ This project aims to preserve, refine, and resurrect endangered languages via AI
 ### Heart of the Approach
 
 -   **Intentional Errors**: Poke the model with tough or context-specific queries.
--   **Narrative Corrections**: Rich cultural commentary instead of bare “right vs. wrong.”
+-   **Narrative Corrections**: Rich cultural commentary instead of bare "right vs. wrong."
 -   **Distillation Triplets**: (Prompt, Disallowed Reply, Narrative Reply).
 -   **Iterative Improvement**: If the model stumbles, revert and add more context.
 
@@ -401,12 +401,12 @@ This project aims to preserve, refine, and resurrect endangered languages via AI
 LoRA attaches small, low-rank matrices to the base model. This dramatically reduces compute and speeds up retraining:
 
 -   **Efficiency**: Fraction of resources required vs. full retraining
--   **Focused Updates**: Capturing the “essence” of new knowledge
+-   **Focused Updates**: Capturing the "essence" of new knowledge
 -   **Rapid Iterations**: Frequent refinement without heavy overhead
 
 ### Mathematical Foundations
 
-If W0\mathbf{W}_0 is the base weight matrix, LoRA introduces ΔW=AB\Delta \mathbf{W} = \mathbf{A}\mathbf{B} with A∈Rd×r\mathbf{A} \in \mathbb{R}^{d \times r} and B∈Rr×k\mathbf{B} \in \mathbb{R}^{r \times k}, where r≪min⁡(d,k)r \ll \min(d,k). Loss functions track both linguistic and cultural accuracy (e.g., a “Cultural Authenticity Score”).
+If W0\mathbf{W}_0 is the base weight matrix, LoRA introduces ΔW=AB\Delta \mathbf{W} = \mathbf{A}\mathbf{B} with A∈Rd×r\mathbf{A} \in \mathbb{R}^{d \times r} and B∈Rr×k\mathbf{B} \in \mathbb{R}^{r \times k}, where r≪min⁡(d,k)r \ll \min(d,k). Loss functions track both linguistic and cultural accuracy (e.g., a "Cultural Authenticity Score").
 
 ### Mermaid Diagram
 
@@ -424,7 +424,7 @@ graph TD
 
 ### Cultural Integrity
 
-Every correction preserves cultural norms—idioms, humor, oral traditions—and ensures the community wields control over the AI’s “mindset.”
+Every correction preserves cultural norms—idioms, humor, oral traditions—and ensures the community wields control over the AI's "mindset."
 
 ### Data Sources
 
@@ -446,8 +446,8 @@ From a tiny dictionary to an AI that:
 
 ### Example Workflow
 
-1.  **Prompt**: “How to say ‘taste slightly with the tip of your tongue’ in Stoney?”
-2.  **Model’s Flawed Reply**: “`supthîyach`” (incorrect).
+1.  **Prompt**: "How to say 'taste slightly with the tip of your tongue' in Stoney?"
+2.  **Model's Flawed Reply**: "`supthîyach`" (incorrect).
 3.  **Community Correction**: Shares the correct phrase plus a story from childhood.
 4.  **Distillation Triplet**: (Prompt, Disallowed, Narrative).
 5.  **LoRA Fine-Tuning**: Model adjusts swiftly.
