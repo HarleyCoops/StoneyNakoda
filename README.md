@@ -71,7 +71,7 @@ By following this code, you can build a model for any low-resource language. The
 ## Introduction
 
 New Years Day, 2025
-Christian H. Cooper
+
 
 In my office, there is a murder; a map of one, at least.  
 
