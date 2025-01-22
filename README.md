@@ -1,5 +1,7 @@
 # From Whispers to Voices: A "Community-In-The-Loop" Proposal for Model Distillation and Language Preservation
 
+New Years Day, 2025
+
 A working model of the Stoney Nakoda language has been developed and is now available for community-in-the-loop testing in 2025:
 
 - **Model App**: [Stoney Language Model App](https://huggingface.co/spaces/HarleyCooper/StoneyApp)  
@@ -68,13 +70,13 @@ In my office, there is a murder; a map of one, at least.
 
 ![Dawson's Map of the Bow Valley](Public/FullDawsonMap.jpg)
 
-George Mercer Dawson explored the Bow Valley in the late 1800s, noting language on the British Columbia side. His map, though richly colored, stands like a tombstone over the Bow Valley where the Stoney people lived because he made not notes on their language and simply noted the people as "recent immigrants"
+George Mercer Dawson explored the Bow Valley in the late 1800s, noting language on the British Columbia side. His map, though richly colored, stands like a tombstone over the Bow Valley where the Stoney people lived because he made no notes on their language and simply noted the people as "recent immigrants"
 
 ![Detail of Dawson Map](Public/dawsondetail.jpg)
 
-Nearby languages blend like “linguistic DNA,” and machine learning could help trace faint threads of lost speech to their roots. Where some see isolation as a curse, in the age of AI, Stoney’s uniqueness is its strength.
+What is very obvious from the linguistic patterns among the Haida, Tshimsia, Thlinkit, Kwakiool and Kawitshin dialects nearby is that languages blend like “linguistic DNA,” and machine learning could help trace faint threads of lost speech to their roots. Where some see isolation as a curse, in the age of AI, Stoney’s isolation turns out to be its strength.
 
-For about two years, I thought about the size of the vector space that would be needed to get a model to self-train on a set of 100% indigenous data, refining its grasp of the broader Stoney Language and this is now publicly and freely available. 
+For about two years, I thought about the size of the vector space that would be needed to get a model to self-train on a set of 100% indigenous data, and how that model could refine its grasp of the broader Stoney Language. This is now publicly and freely available. 
 
 
 Two key releases influenced my thinking of what was possible:
@@ -82,7 +84,8 @@ Two key releases influenced my thinking of what was possible:
 1. [Meta’s Llama-3 Model (April 18th, 2024)](https://www.reuters.com/technology/meta-releases-early-versions-its-llama-3-ai-model-2024-04-18/)  
 2. [OpenAI Fine-Tuning API (October 2024)](https://openai.com/index/api-model-distillation/)
 
-Both gave me the push to build what’s presented here. The true innovation lies in how communities create dictionaries and then fine-tune each model iteration. Textbooks that the Stoney community created—intended as educational tools—became perfect concept of a model prompts, each chapter or word offering pure indigenous data devoid of external weights or biases to the fine-tuning process.
+Both gave me the motivation to build what’s presented here. The true innovation here lies in how communities can narratively correct the initially flawed response (about 10% of the time, the model works every time.) then that feeback be passed seamleslly back into the fine-tuning process. The [textbooks](https://globalnews.ca/news/9430501/stoney-nakota-language-textbook/) that the Stoney community created—intended as educational tools—became perfect concept of a model prompts, each chapter or word offering pure indigenous data devoid of external weights or biases to the fine-tuning process.
+
 
 Early in 2023, I found an original, unpublished sketch by James Hector likely drawn in the summer of 1858 or 1859 along the Bow River in Southern Alberta:
 
