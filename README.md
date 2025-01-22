@@ -8,7 +8,7 @@ A working model of the Stoney Nakoda language has been developed and is now avai
 
 Any First Nations community seeking to apply this approach to their own language is warmly invited to reach out. 
 
-By following this code, you can build a model for any low-resource language. The starting dictionary—minimum ~8,000 words—remains critical.
+By following this code, you can build a model for any low-resource language. The starting dictionary size should be ~8,000 words.
 
 ---
 
@@ -68,18 +68,21 @@ In my office, there is a murder; a map of one, at least.
 
 ![Dawson's Map of the Bow Valley](Public/FullDawsonMap.jpg)
 
-George Mercer Dawson explored the Bow Valley in the late 1800s, noting language on the British Columbia side. His map, though richly colored, stands like a tombstone over the Bow Valley where the Stoney people lived:
+George Mercer Dawson explored the Bow Valley in the late 1800s, noting language on the British Columbia side. His map, though richly colored, stands like a tombstone over the Bow Valley where the Stoney people lived because he made not notes on their language and simply noted the people as "recent immigrants"
 
 ![Detail of Dawson Map](Public/dawsondetail.jpg)
 
 Nearby languages blend like “linguistic DNA,” and machine learning could help trace faint threads of lost speech to their roots. Where some see isolation as a curse, in the age of AI, Stoney’s uniqueness is its strength.
 
-For about two years, I worked on the mathematics of how a model could self-train on a set of 100% indigenous data, refining its grasp of the broader Stoney Language. Two key releases influenced my thinking of what was possible:
+For about two years, I thought about the size of the vector space that would be needed to get a model to self-train on a set of 100% indigenous data, refining its grasp of the broader Stoney Language and this is now publicly and freely available. 
+
+
+Two key releases influenced my thinking of what was possible:
 
 1. [Meta’s Llama-3 Model (April 18th, 2024)](https://www.reuters.com/technology/meta-releases-early-versions-its-llama-3-ai-model-2024-04-18/)  
 2. [OpenAI Fine-Tuning API (October 2024)](https://openai.com/index/api-model-distillation/)
 
-Both gave me the push to build what’s presented here. The true innovation lies in how communities create dictionaries and then fine-tune each model iteration. Textbooks that the Stoney community created—intended as educational tools—became perfect concept of a model prompts, each chapter or word offering pure indigenous data devoid of external biases. 
+Both gave me the push to build what’s presented here. The true innovation lies in how communities create dictionaries and then fine-tune each model iteration. Textbooks that the Stoney community created—intended as educational tools—became perfect concept of a model prompts, each chapter or word offering pure indigenous data devoid of external weights or biases to the fine-tuning process.
 
 Early in 2023, I found an original, unpublished sketch by James Hector likely drawn in the summer of 1858 or 1859 along the Bow River in Southern Alberta:
 
@@ -87,11 +90,11 @@ Early in 2023, I found an original, unpublished sketch by James Hector likely dr
 
 Finding this, and already aware of George Mercer Dawson's work on First Nation's language on the British Columbia side, this inspired a final push to ensure the Community-In-The-Loop concept became a reality.
 
-This sketch shifted my thinking from considering the Stoney “People” to this Stoney “Woman” who saw these same mountains and rivers I see everyday, who had a very different cultural relationship with the environment and how AI could "bootstrap" a working model of the Stoney language simply from a small set of words. The Community-in-the-Loop model distillation will quickly converge this initial model toward fluencey. I suspect this will require the community to correct about 80,000 question and answer pairs. 
+This sketch shifted my thinking from considering the "Stoney People” to this "Stoney Woman” who saw these same mountains and rivers I see everyday, yet who had a very different way to think about and communicate to the world around her.  The Community-in-the-Loop model distillation will quickly converge this initial model toward fluencey. I suspect this will require the community to correct about 80,000 question and answer pairs and which will take about 3 weekends of community refinement and will cost less that $800 in OpenAI computing power. Recent releases by Google and the Chinese Lab DeepSeek, could dramatically lower this further.  
 
-I think what this project as left me with is the sense that a hundred years from now, strangers will live in our homes, and most of what we worry over won’t matter. As the year draws to a close, let’s remember “Stoney Woman” and seize this new technology to ensure this language is permanently preserved and owned by, the community itself. 
+I think what this project has left me considering most ist that a century from now, strangers will live in our homes and most of what we worry about today will not matter. But we can honor “Stoney Woman” by making sure her language endures, forging a living record in an age of AI. Incredibly, this tool will work with any first nations language, as long as there is a starting dictionary of about 8,000 words. 
 
-**I am available to help any nation in Canada or the United States with the code.**
+**I am freely available to help any First Nation in Canada.**
 
 ## Understanding How AI Learns Stoney Words Using Cosine Similarity
 
