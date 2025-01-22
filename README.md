@@ -359,9 +359,7 @@ python openai_finetune.py
 
 ----------
 
-## License
 
-Project licensed under [LICENSE]; see LICENSE file.
 
 ----------
 
