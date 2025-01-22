@@ -12,15 +12,9 @@ By following this code, you can build a model for any low-resource language. The
 
 ---
 
-
 <div align="center">
-
-<!-- Opens in new tab -->
-[Ask Google What This is About](https://huggingface.co/spaces/HarleyCooper/AskAboutCIL){:target="_blank"}
-
+<a href="https://huggingface.co/spaces/HarleyCooper/AskAboutCIL" target="_blank">Ask Google What This is About</a>
 </div>
-
-
 
 ---
 
