@@ -1,7 +1,5 @@
 # From Whispers to Voices: A "Community-In-The-Loop" Proposal for Model Distillation and Language Preservation
 
-New Years Day, 2025
-
 A working model of the Stoney Nakoda language has been developed and is now available for community-in-the-loop testing in 2025:
 
 - **Model App**: [Stoney Language Model App](https://huggingface.co/spaces/HarleyCooper/StoneyApp)  
@@ -66,11 +64,14 @@ By following this code, you can build a model for any low-resource language. The
 
 ## Introduction
 
+New Years Day, 2025
+Christian H. Cooper
+
 In my office, there is a murder; a map of one, at least.  
 
 ![Dawson's Map of the Bow Valley](Public/FullDawsonMap.jpg)
 
-George Mercer Dawson explored the Bow Valley in the late 1800s, noting language on the British Columbia side. His map, though richly colored, stands like a tombstone over the Bow Valley where the Stoney people lived because he made no notes on their language and simply noted the people as "recent immigrants"
+George Mercer Dawson explored the Bow Valley in the late 1800s as a geologist but also as a linguist, noting language on the British Columbia side. His map, though richly colored, stands like a tombstone over the Bow Valley where the Stoney people lived because he made no notes on their language and simply noted the people as "recent immigrants". Much of this work was based on the notes of W. Faser Tolmie and was published after his death. 
 
 ![Detail of Dawson Map](Public/dawsondetail.jpg)
 
@@ -359,23 +360,11 @@ python openai_finetune.py
 
 ----------
 
-
-
-----------
-
-## Acknowledgments
-
--   **Stoney Nakoda First Nation**: Language expertise
--   **OpenAI & Google**: AI model support
--   **Contributors & Advisors**
-
-----------
-
 ## The Community-in-the-Loop Revolution
 
 ### Introduction
 
-We aim to preserve, refine, and resurrect endangered languages via AI. Minimal lexical data can evolve into a culturally rich digital speaker of Stoney Nakoda. This subverts assumptions that massive datasets are necessary, instead emphasizing:
+This project aims to preserve, refine, and resurrect endangered languages via AI fine-tuning and model distillation. Minimal lexical data can evolve into a culturally rich digital speaker of Stoney Nakoda. This subverts assumptions that massive datasets are necessary, instead emphasizing:
 
 -   Iterative improvement with community feedback
 -   Narrative corrections (cultural context over simple dictionary entries)
