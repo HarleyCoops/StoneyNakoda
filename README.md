@@ -13,7 +13,9 @@ By following this code, you can build a model for any low-resource language. The
 ---
 
 <div align="center">
-<a href="https://huggingface.co/spaces/HarleyCooper/AskAboutCIL" target="_blank"><font color="red" size="5">Ask Google What This is About</font></a>
+  <a href="https://huggingface.co/spaces/HarleyCooper/AskAboutCIL" target="_blank">
+    <img src="https://img.shields.io/badge/Ask%20Google%20What%20This%20is%20About-FF0000?style=for-the-badge" alt="Ask Google What This is About">
+  </a>
 </div>
 
 ---
@@ -470,6 +472,3 @@ From a tiny dictionary to an AI that:
 -   **Distillation Triplet**: (Prompt, Flawed Reply, Narrative Reply)
 -   **LoRA**: Low-Rank Adaptation
 -   **Community-in-the-Loop**: Paradigm of continuous human-guided refinement
-
-
-
