@@ -407,7 +407,44 @@ LoRA attaches small, low-rank matrices to the base model. This dramatically redu
 
 ### Mathematical Foundations
 
-If W0\mathbf{W}_0 is the base weight matrix, LoRA introduces ΔW=AB\Delta \mathbf{W} = \mathbf{A}\mathbf{B} with A∈Rd×r\mathbf{A} \in \mathbb{R}^{d \times r} and B∈Rr×k\mathbf{B} \in \mathbb{R}^{r \times k}, where r≪min⁡(d,k)r \ll \min(d,k). Loss functions track both linguistic and cultural accuracy (e.g., a "Cultural Authenticity Score").
+<div align="center">
+  <img src="https://latex.codecogs.com/png.latex?\dpi{120}&space;\large&space;W&space;=&space;W_0&space;&plus;&space;\Delta&space;W&space;=&space;W_0&space;&plus;&space;AB" title="LoRA Weight Decomposition" />
+</div>
+
+LoRA (Low-Rank Adaptation) works by decomposing weight updates into smaller matrices, dramatically reducing parameters while preserving learning capacity.
+
+#### Core Principles
+
+- **Weight Decomposition**: If $W_0 \in \mathbb{R}^{d \times k}$ is the pre-trained weight matrix, LoRA parameterizes the update as:
+  
+  $$\Delta W = AB$$
+  
+  Where $A \in \mathbb{R}^{d \times r}$ and $B \in \mathbb{R}^{r \times k}$, with rank $r \ll \min(d,k)$
+
+- **Parameter Efficiency**: For a typical transformer layer where $d=k=4096$, using $r=16$ reduces parameters by 99.2%
+
+- **Forward Pass Computation**:
+  
+  $$h = W_0x + \Delta Wx = W_0x + ABx$$
+
+#### Cultural-Linguistic Loss Function
+
+Our approach combines standard cross-entropy loss with a novel Cultural Authenticity Score (CAS):
+
+$$\mathcal{L} = \alpha\mathcal{L}_{CE} + (1-\alpha)\mathcal{L}_{CAS}$$
+
+Where:
+- $\mathcal{L}_{CE}$ is cross-entropy loss measuring linguistic accuracy
+- $\mathcal{L}_{CAS}$ is derived from community feedback ratings (1-5 scale)
+- $\alpha$ balances linguistic precision with cultural authenticity (typically 0.7)
+
+#### Adaptation Dynamics
+
+The adaptation process creates a specialized subspace that captures Stoney-specific linguistic patterns while preserving the base model's general capabilities. This enables:
+
+1. **Targeted Learning**: Focus on Stoney-specific knowledge without catastrophic forgetting
+2. **Efficient Transfer**: Leverage pre-trained knowledge while adding cultural nuance
+3. **Iterative Refinement**: Quick adaptation cycles based on community feedback
 
 ### Mermaid Diagram
 
