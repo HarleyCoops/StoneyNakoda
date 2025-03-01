@@ -140,7 +140,9 @@ The Role of Cosine Similarity in AI Learning
 Iterative Refinement
 Through repeated feedback and fine-tuning, the AI improves its ability to place Stoney words correctly, not just individually but in the context of sentences and paragraphs. Over time, it develops a detailed, dynamic map of the Stoney language, with words clustered according to their community-informed meanings and uses.
 
-Although this is not cosine similarity, you can see the relationships among words can concepts in Stoney as I have mapped them here: https://atlas.nomic.ai/data/harleycoops/stoney-nakoda-language-synthetic/map/5c87caaf-6be0-4546-9e83-826569070b24#nqlL
+Although this is not cosine similarity, you can see the relationships among words can concepts in Stoney as I have mapped them here:
+
+[![Stoney Nakoda Language Map in Nomic Atlas](Public/nomic_atlas_preview.jpg)](https://atlas.nomic.ai/data/harleycoops/stoney-1/map/8049523d-b620-4da3-962c-c509e08f586f#iE2b)
 
 
 ---
