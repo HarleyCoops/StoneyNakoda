@@ -1,0 +1,819 @@
+
+# This is a rules idea I had where you just pass the dictionary of known words and ask the LLM to generate a set of rules. Since there is no real limit to the number of GRPO rules that could be evaluated, you could have a reward function that is based on thousands of these rules. 
+
+
+[
+    {
+        "rule_id": 1,
+        "description": "The word 'aktesî' is used to describe something done suddenly."
+    },
+    {
+        "rule_id": 2,
+        "description": "The suffix '-ch' appears to often denote a stative verb or state of being (e.g., 'nîhâsîch', 'ihûgapenâch', 'hecheduch')."
+    },
+    {
+        "rule_id": 3,
+        "description": "'Tâga înech' is a fixed phrase meaning 'ablaze,' specifically relating to fire."
+    },
+    {
+        "rule_id": 4,
+        "description": "'Yapten' is an adverb describing the manner of action, specifically meaning 'in an abbreviated manner.'"
+    },
+    {
+        "rule_id": 5,
+        "description": "Compound words and phrases are common (e.g., 'akichû bathîptesîch')."
+    },
+    {
+        "rule_id": 6,
+        "description": "Repetition or duplication of phrases (e.g. tâga înech pair 3 & 6 ) appears possible for affirmation, but context matters"
+    },
+    {
+        "rule_id": 7,
+        "description": "The negative 'sîch' negates the preceding verb or verb phrase (e.g., 'hnesîch')."
+    },
+    {
+        "rule_id": 8,
+        "description": "'Dââ wokchâsîch and 'ktûsîyagen ûûcha' means 'abnormal'"
+    },
+    {
+        "rule_id": 9,
+        "description": "Stoney uses stative verbs to express states of being ('ihûgapenâch')."
+    },
+    {
+        "rule_id": 10,
+        "description": "Noun phrases can describe conditions or states ('chîja wanîja')."
+    },
+    {
+        "rule_id": 11,
+        "description": "'ktûsîyagen ûûcha' classifies as an adjective."
+    },
+    {
+        "rule_id": 12,
+        "description": "Stoney sentence structure may show SOV(Subject Object Verb) order but context might have specific arrangements. 'Mini ihûgapenâch inâbe' (Water above rocks)"
+    },
+    {
+        "rule_id": 13,
+        "description": "'nen ûsîch' signifies absence and is classified as an active intransitive verb."
+    },
+    {
+        "rule_id": 14,
+        "description": "Absolute certainty can be expressed in multiple ways, through verb or general phrases (e.g., 'chorhe wîjakabi ûth', 'hecheduge chechach')"
+    },
+    {
+        "rule_id": 15,
+        "description": "'rhpâyabi' as a noun describes actions."
+    },
+    {
+        "rule_id": 16,
+        "description": "'echedus eyanaach' describes situational conditions, not individual people, per se"
+    },
+    {
+        "rule_id": 17,
+        "description": "'chorhe wîjakabi ûth' strong agreement."
+    },
+    {
+        "rule_id": 18,
+        "description": "'daguchas' appears to be an interjection."
+    },
+    {
+        "rule_id": 19,
+        "description": "'rhpâyabi' means 'to absorb'."
+    },
+    {
+        "rule_id": 20,
+        "description": "'wîja ne piyesîch' signifies strong emphasis/magnitude."
+    },
+    {
+        "rule_id": 21,
+        "description": "Stoney expresses nuances of meaning by choosing particular noun forms that classify."
+    },
+    {
+        "rule_id": 22,
+        "description": "Possesive nouns, with object and possessor apparent:  'yuzâgabi nâcha'  Dog abuse (verb)"
+    },
+    {
+        "rule_id": 23,
+        "description": "echedus eyanaach: Power abuse"
+    },
+    {
+        "rule_id": 24,
+        "description": "'wahnuzâgach' to be doing or active something"
+    },
+    {
+        "rule_id": 25,
+        "description": "'daguchas' absurdity."
+    },
+    {
+        "rule_id": 26,
+        "description": "wahnuzâgach - To do something physically"
+    },
+    {
+        "rule_id": 27,
+        "description": "Verb variations distinguish between action upon self vs action on external object (e.g. accelerate self = 'ninanayach', vs causing object acceleration= 'ninana yekiyach')"
+    },
+    {
+        "rule_id": 28,
+        "description": "The specificity rule applies even for 'accept'- taûkach(do something),okâchijimuṯẖach (generally, not a promise)"
+    },
+    {
+        "rule_id": 29,
+        "description": "Stoney has words to mark audible aspects to spoken communication"
+    },
+    {
+        "rule_id": 30,
+        "description": "Descriptive language uses extensive words"
+    },
+    {
+        "rule_id": 31,
+        "description": "Verb variation, accent example, 'yatokâch'"
+    },
+    {
+        "rule_id": 32,
+        "description": "The negative structure: root, modifier, (neg) 'taûkasîch'"
+    },
+    {
+        "rule_id": 33,
+        "description": "stative verb as an acceptability indicator 'hecheduch'"
+    },
+    {
+        "rule_id": 34,
+        "description": "Intransitive Verbs can carry description 'waktas naskach (by accident) untied."
+    },
+    {
+        "rule_id": 35,
+        "description": "'taûkach', meaning to accept to do something."
+    },
+    {
+        "rule_id": 36,
+        "description": "There exist verbs specific to unintentional or reflexive action ('îchihnaskidach')"
+    },
+    {
+        "rule_id": 37,
+        "description": "'hecheduch', general acceptable condition"
+    },
+    {
+        "rule_id": 38,
+        "description": "'gichiyach', you direct accompany."
+    },
+    {
+        "rule_id": 39,
+        "description": "Word creation -'waogichirheyîbi', adj from verb or noun forms"
+    },
+    {
+        "rule_id": 40,
+        "description": "Verbs showing untentional/unconcious events:'waktas naskach', untied (shoe) by accident"
+    },
+    {
+        "rule_id": 41,
+        "description": "'dohûdââ ogihich':  He accomplished *A LOT*"
+    },
+    {
+        "rule_id": 42,
+        "description": "'gichiyach', verb (transitive) You go WITH a direct object. vs 'gichihiyuch' (intransitive no direct object)"
+    },
+    {
+        "rule_id": 43,
+        "description": "Negative construction:'waogichirheyîbi', "
+    },
+    {
+        "rule_id": 44,
+        "description": "'dohânîna apiîchiyach': complex meaning by extensive expression (hard work)"
+    },
+    {
+        "rule_id": 45,
+        "description": "'hekta agichidesîch', active, transitive verb construction."
+    },
+    {
+        "rule_id": 46,
+        "description": "'wîchitawachî akecheyach' describes many becoming unified in idea or action"
+    },
+    {
+        "rule_id": 47,
+        "description": "'yawabi îgesîhen' negative suffix construction and use of implied 'it is'"
+    },
+    {
+        "rule_id": 48,
+        "description": "Role descriptive words show function/position:'sûniya awîye', accountant,"
+    },
+    {
+        "rule_id": 49,
+        "description": "Accountability:'hekta agichidesîch',"
+    },
+    {
+        "rule_id": 50,
+        "description": "'agichide' describes personality/quality as a noun construction"
+    },
+    {
+        "rule_id": 51,
+        "description": "'yawabi îgesîhen': construction showing item described(yawabi) negative and verb"
+    },
+    {
+        "rule_id": 52,
+        "description": "'thudanâ opegiyach' action for collection. -Verb"
+    },
+    {
+        "rule_id": 53,
+        "description": "Abstract Noun vs Specific type of resource. - Wealth/Money distinction, by phrase"
+    },
+    {
+        "rule_id": 54,
+        "description": "'sûniya awîye' descriptive function,"
+    },
+    {
+        "rule_id": 55,
+        "description": "'wâmnâyabi', item/term. Noun from verb or description"
+    },
+    {
+        "rule_id": 56,
+        "description": "'wâmnâyabi', noun."
+    },
+    {
+        "rule_id": 57,
+        "description": "piyanâch: verb of truth condition,."
+    },
+    {
+        "rule_id": 58,
+        "description": "Verbs for internal states:'owahiyach',"
+    },
+    {
+        "rule_id": 59,
+        "description": "Verb root shows general or specific:'ogihich'(general achieve)/ vs 'wîchorhâge ogihich' (specify action or objective of achievement)."
+    },
+    {
+        "rule_id": 60,
+        "description": "Stoney has unique words for compounds:'mînîyathi'"
+    },
+    {
+        "rule_id": 61,
+        "description": "'dagû awachîkiye ze ogihi hâch' goal realization"
+    },
+    {
+        "rule_id": 62,
+        "description": "Very short agreement affirmation 'hâ'. Exclamitory and verb roots showing complete words."
+    },
+    {
+        "rule_id": 63,
+        "description": "Action as a noun:'pagahûch'."
+    },
+    {
+        "rule_id": 64,
+        "description": "Stoney words show degree/specification of activity/state/result from verb action."
+    },
+    {
+        "rule_id": 65,
+        "description": "Specialized terms:'mînîyathi'."
+    },
+    {
+        "rule_id": 66,
+        "description": "Complex expression built from Verb construction, direct object imply. : 'oginîch'(acquire) context as needed"
+    },
+    {
+        "rule_id": 67,
+        "description": "Multi word phrase to be noun, Compound naming construction: 'thija tawonâptche'."
+    },
+    {
+        "rule_id": 68,
+        "description": "Property definition by using verb form:'yogaṯẖach' ."
+    },
+    {
+        "rule_id": 69,
+        "description": "Extensive/ Compound phrasing with verbs.: 'iye gîye îchichiyach' "
+    },
+    {
+        "rule_id": 70,
+        "description": "Complex description or term specification:'mâkochî yotabi wazi'."
+    },
+    {
+        "rule_id": 71,
+        "description": "Verb 'oginîch'."
+    },
+    {
+        "rule_id": 72,
+        "description": "'mâkochî yotabi wazi' Noun and complex phrase showing property"
+    },
+    {
+        "rule_id": 73,
+        "description": "Unique cultural references use specific nouns, for identification:'Agathâpabi'"
+    },
+    {
+        "rule_id": 74,
+        "description": "Verbs and description combine:'wîkoske wîyâ yakta-'."
+    },
+    {
+        "rule_id": 75,
+        "description": "'ektaatham' marker on object."
+    },
+    {
+        "rule_id": 76,
+        "description": "Direction or relational specification is build into phrases.'Agathâpabi'."
+    },
+    {
+        "rule_id": 77,
+        "description": "Action to change conditions:'wahogûîchakiyabich'."
+    },
+    {
+        "rule_id": 78,
+        "description": "State to describe relative, qualitative degree.'wanide'  and 'wanidabich'"
+    },
+    {
+        "rule_id": 79,
+        "description": "Modification/action to existing:'piyasîyabiktach'."
+    },
+    {
+        "rule_id": 80,
+        "description": "Phrase, Descriptive word:  'wîkoske wîyâ yakta-'"
+    },
+    {
+        "rule_id": 81,
+        "description": "Relational Qualities on activity and result:wanide'"
+    },
+    {
+        "rule_id": 82,
+        "description": "'wahogûîchakiyabich': Discriptive Verb on result or outcome, change on people,."
+    },
+    {
+        "rule_id": 83,
+        "description": "Verb showing mimic or mirroring conditions or behaviour'îchikpaṯẖabich' "
+    },
+    {
+        "rule_id": 84,
+        "description": "Cultural, contextual distinction on terms:'hecha gûṯẖetha'(actor)/ 'owahâkiyabi piîchiyen îtowagîhâ'.(film actor)"
+    },
+    {
+        "rule_id": 85,
+        "description": "'waisteyabi' abstract quality of awareness and presence"
+    },
+    {
+        "rule_id": 86,
+        "description": "Behaviour quality descriptor koskayaktawîch (acting)"
+    },
+    {
+        "rule_id": 87,
+        "description": "'hecheduktes' adverb to be contextually added"
+    },
+    {
+        "rule_id": 88,
+        "description": "Descriptive expression - phrasing actor or type"
+    },
+    {
+        "rule_id": 89,
+        "description": "'îchikpaṯẖabich', description - acting (verb)"
+    },
+    {
+        "rule_id": 90,
+        "description": "Translation- cultural and time aware adaptation needed: op'opiîchiye oyagabi'."
+    },
+    {
+        "rule_id": 91,
+        "description": "Descriptive phrase, actor:'koskayaktawîch', role specific (gender - behaviour) action and intent"
+    },
+    {
+        "rule_id": 92,
+        "description": "'opewagiyachiyach': verb of add/inclusive to something"
+    },
+    {
+        "rule_id": 93,
+        "description": "'mînî opeyach'. Adding description to a direct object by action or function, Water addition example,"
+    },
+    {
+        "rule_id": 94,
+        "description": "Anatomical Noun : 'nodethu',. Classification as (inherent) parts on the being"
+    },
+    {
+        "rule_id": 95,
+        "description": "'omâktûzach' Active Intransitive Verb."
+    },
+    {
+        "rule_id": 96,
+        "description": "Construction, Complex intent combining verbs to adjust description, ex'mînî opeyach'(water add), and combined:opewagiyachiyach"
+    },
+    {
+        "rule_id": 97,
+        "description": "Condition, Internal. Verb as active:  'ayach,' vs 'odokenwahâsîch',"
+    },
+    {
+        "rule_id": 98,
+        "description": "'bare yawabich', specific context for verb, implying quantity object"
+    },
+    {
+        "rule_id": 99,
+        "description": "Property/Condition as Active or Stative. Subtle state -vs - dynamic change implied or inherent, distinction: 'awîchayach'(influence)/ vs  'anîyaktach',/vs  'âniyâtach',.(description)"
+    },
+    {
+        "rule_id": 100,
+        "description": "Nouns describing cultural specific behaviour from words/roots common :nâpjabin(drug)  odokenrhamisîrh/ ayeîchiyabi,/dagu aye - multiple forms and ways,"
+    },
+    {
+        "rule_id": 101,
+        "description": "verb: Overcome (negative object) -nâîchispach"
+    },
+    {
+        "rule_id": 102,
+        "description": "Noun - Phrase :Drug Abuse Condition, with a specific condition phrase showing drug or item. :nâpjabin(drug)"
+    },
+    {
+        "rule_id": 103,
+        "description": "Subtle distinction, inherent characteristic and property- vs dynamic, active changes for a word/noun: 'awîchayach', /vs'anîyaktach',/vs  'âniyâtach',"
+    },
+    {
+        "rule_id": 104,
+        "description": "conjunction and adverb to add:'nechen isiyapanathchiyach'"
+    },
+    {
+        "rule_id": 105,
+        "description": "verb use/selection in stoney showing respect/regard or cultural relationship by work use:  Family vs Formal audience - wahi gichichobi (to a group or individual), // owîchakiyayaktach"
+    },
+    {
+        "rule_id": 106,
+        "description": "Giving / Imparting to group or crowd - presentation:'owîchakiyayaktach'"
+    },
+    {
+        "rule_id": 107,
+        "description": "'enâ ûch' Adding more substance (item, with an explicit or context known object) by use"
+    },
+    {
+        "rule_id": 108,
+        "description": "'adaiya îjuch': to fix/modify something (with an implicit, specific use of the verb object)."
+    },
+    {
+        "rule_id": 109,
+        "description": "Address- familial term usage'wahi gichichobi'. Familial identification"
+    },
+    {
+        "rule_id": 110,
+        "description": "Verb showing relation (join)- transitive: 'kokiheyach' to fence"
+    },
+    {
+        "rule_id": 111,
+        "description": "Admire/Respect.Verb 'wathtewanâûch'"
+    },
+    {
+        "rule_id": 112,
+        "description": "'adaiya îjuch', Adjust object"
+    },
+    {
+        "rule_id": 113,
+        "description": "Admission condition for people (responsibility) echedus orhâgich"
+    },
+    {
+        "rule_id": 114,
+        "description": "Phrase:  Complex advice - admonition:awaktaîchiya gichûṯẖabi yahnech"
+    },
+    {
+        "rule_id": 115,
+        "description": "'kokiheyach'.to adjoin transitive."
+    },
+    {
+        "rule_id": 116,
+        "description": "'echedus orhâgich': to accept fault, self implication,"
+    },
+    {
+        "rule_id": 117,
+        "description": "'awaktaîchiya gichûṯẖabi yahnech'- Noun Phrase"
+    },
+    {
+        "rule_id": 118,
+        "description": "'mnoganâ chach' descriptor showing age -maturity- role in culture."
+    },
+    {
+        "rule_id": 119,
+        "description": "Stoney verb/noun for relation(adopt, relation to father) and family role wîjihiyach,"
+    },
+    {
+        "rule_id": 120,
+        "description": "'woskînâgâ'.adorable (implies presence)"
+    },
+    {
+        "rule_id": 121,
+        "description": "Noun 'aktuwa': Adoption role specific term -father"
+    },
+    {
+        "rule_id": 122,
+        "description": "State:Adorable'woskînâgâ' "
+    },
+    {
+        "rule_id": 123,
+        "description": "Verb phrase for development maturity:'awîjihi yach' to become adult, with adult an adjective here"
+    },
+    {
+        "rule_id": 124,
+        "description": "Postposition 'gaîtogam': Prior, time-place to describe something else"
+    },
+    {
+        "rule_id": 125,
+        "description": "Verb Intransitive, active to mean Refinement:'togagihâch',"
+    },
+    {
+        "rule_id": 126,
+        "description": "Position -after nouns to show relation 'gaîtogam'"
+    },
+    {
+        "rule_id": 127,
+        "description": "Action Verb (implied, external and internal acting, behaviour) on condition:'dagu gasta iyotach'."
+    },
+    {
+        "rule_id": 128,
+        "description": "Condition(noun) :Verb/Behaviour descriptor, specific context. Imply on behaviour.:'wahnuzâgechach'"
+    },
+    {
+        "rule_id": 129,
+        "description": "Object Transitive. to be in a 'forward place-akuwapin ehnech'"
+    },
+    {
+        "rule_id": 130,
+        "description": "Time/Location descriptor showing priority ('gaîtogam', Postposition), and State( advanced ) 'togagihâch', active intransitive verb"
+    },
+    {
+        "rule_id": 131,
+        "description": "The suffix '-bi' can denote an alienable noun."
+    },
+    {
+        "rule_id": 132,
+        "description": "The suffix '-abi' can appear as a part of a verb phrase"
+    },
+     {
+        "rule_id": 133,
+        "description": "Stoney uses specific nouns of Address depending on relationship (e.g. 'wahi gichichobi' to refer to Family)"
+     },
+     {
+         "rule_id": 134,
+         "description": "Stoney descriptive verbs often describe results of actions on nouns"
+     },
+    {
+        "rule_id":135,
+        "description": "Stoney culture distinguishes 'mimic' (mirror) conditions by using verb/descriptive"
+    },
+      {
+        "rule_id": 136,
+         "description": "Words describe position or time in reference. Example (Priority): 'gaîtogam' "
+      },
+        {
+        "rule_id":137,
+          "description":"Words in Stoney show degree/distinction on Activity states/Property "
+        },
+       {
+           "rule_id":138,
+        "description": "Words using Noun/Verb forms, that are descriptive"
+       },
+       {
+        "rule_id":139,
+       "description":"Adverbs describing Location or state: 'yapten'"
+       },
+      {
+        "rule_id":140,
+        "description": "Internal and External. Expression distinguishes state of mind/thought vs externally observed results by use of noun and descriptive form selection"
+      },
+       {
+           "rule_id":141,
+          "description": "Noun/Adjective descriptors of status. "
+       },
+       {
+        "rule_id": 142,
+       "description": "The combination of verbs to define a state more specifically(needs, action), Example: Combination from rule 96 for description, water and needs combination."
+       },
+     {
+        "rule_id": 143,
+          "description":"Word, Compound description :Stoney specific-culturally significant reference. 'Agathâpabi'."
+     },
+{
+    "rule_id":144,
+       "description":"The selection of descriptive phrase/words reflect culture (gender/time). example wîkoske(child act - female ) / koskayaktawîch-  Child-like-Male. behaviour descriptors,role specific"
+
+},
+       {
+    "rule_id": 145,
+      "description": "Noun for parts of self"
+},
+     {
+    "rule_id": 146,
+      "description": "Words from root to express dynamic and state condition as an object quality"
+},
+    {
+         "rule_id":147,
+        "description":"Word root or stem construction of verb for action(verb)"
+    },
+    {
+    "rule_id":148,
+         "description":"Noun showing cultural relevance. Abstract to Physical condition."
+    },
+     {
+         "rule_id":149,
+            "description": "Nouns for objects -cultural(with time implied)"
+        },
+    {
+      "rule_id":150,
+         "description": "Verb - intransitive showing active, moving property."
+
+    },
+    {
+         "rule_id": 151,
+      "description": "Noun- words for external body parts(implies on, and a separate piece - inalienable)"
+
+    },
+     {
+        "rule_id": 152,
+       "description":"Verb description using behaviour/result or object"
+
+     },
+   {
+        "rule_id": 153,
+        "description":"Stoney words imply object relationship. "
+
+   },
+     {
+      "rule_id": 154,
+       "description": "Words reflecting culture specific. Verb root forms reflect degree (change-over state)"
+    },
+     {
+        "rule_id":155,
+         "description": "Property - state description using Adjectives"
+    },
+        {
+            "rule_id":156,
+        "description":"Condition expressed in Extensive verbs showing intent. Complex- Extensive description"
+     },
+     {
+            "rule_id": 157,
+     "description":"Condition on a body part expressed with adjective/descriptor"
+     },
+    {
+          "rule_id": 158,
+       "description":"Verbs describe something happening by-accident. Root construction"
+     },
+       {
+          "rule_id": 159,
+         "description": "Nouns: Nouns defining external body conditions. Specific(example Eyes)"
+
+     },
+      {
+         "rule_id": 160,
+      "description": "Cultural significance(term): Noun that shows Relationship (ex wîjihiyach,,aktuwa).)"
+
+      },
+     {
+        "rule_id": 161,
+       "description": "Descriptive words from body states/condition(alienable)"
+     },
+      {
+        "rule_id":162,
+       "description":"Noun (adjective/qualitative - to describe) person role- behaviour quality,"
+
+     },
+      {
+         "rule_id":163,
+         "description": "Action on behaviour, change with extensive-specific phrase: verb showing adjustment, with self awareness as focus of change.: Self vs External directed condition."
+     },
+       {
+       "rule_id": 164,
+     "description": "Noun- word from state description/qualify on the external"
+
+},
+      {
+          "rule_id":165,
+      "description": "Internal -mindful - adjective descriptors/behaviour from people/condition, description showing mindful or intent-state changes from external acts."
+     },
+{
+           "rule_id": 166,
+      "description":"Extensive Description with Noun"
+},
+        {
+           "rule_id":167,
+       "description":"Negative behaviour quality showing implied action by object quality:Abuse quality(example)."
+       },
+{
+       "rule_id":168,
+          "description":"Action Verb Phrase or Verb for Action (or behaviour as condition)."
+
+    },
+         {
+           "rule_id":169,
+            "description": "Words that describe abstract concept for the language(wealth). Culture significant - term-word showing wealth (money and general wealth example)"
+        },
+        {
+            "rule_id": 170,
+            "description":"Term to describe self changes or doing: Action (reflection- with an object- verb and a cultural -term meaning) : echedus orhâgich,"
+        },
+    {
+       "rule_id": 171,
+           "description":"Condition with Noun-Property construction (mnoganâ chach): age-growth quality specific role in time context"
+    },
+         {
+              "rule_id": 172,
+        "description": "Action on external: Noun -  wahnuzâgach"
+
+       },
+    {
+       "rule_id": 173,
+        "description": "Complex, Descriptive phrase expressing degree/location, directionality(forward place/advance)"
+      },
+
+     {
+     "rule_id":174,
+   "description":"Verb on state: internal changes on condition (awîchayach/ anîyaktach,/âniyâtach)"
+    },
+     {
+      "rule_id":175,
+        "description":"Noun/Verb describing Internal, mind /quality conditions. "
+
+},
+     {
+        "rule_id": 176,
+           "description":"Stoney words combine or construct nouns using adjectives or descriptions implying action results on an object.: 'thudanâ opegiyach'"
+},
+    {
+       "rule_id": 177,
+     "description":"Role/responsibility. Stoney defines noun and use by construction (root) word selection."
+     },
+
+{
+         "rule_id":178,
+     "description":"Phrases showing extensive or degree: Condition, extensive description on action-change behaviour using verbs in cultural respect.:wîchitawachî akecheyach"
+    },
+
+       {
+             "rule_id":179,
+           "description": "Term/Name from verb/behaviour action on external."
+
+       },
+         {
+           "rule_id": 180,
+               "description":"Stoney word showing behaviour that describes actions."
+
+       },
+       {
+    "rule_id":181,
+       "description":"State of Being words/noun describe self behaviour - reflection to environment"
+
+      },
+    {
+           "rule_id":182,
+           "description":"Words using Stoney root- to express behaviour from state condition, imply (self act on/internal)-vs externalized or environmental acting as result(daguchas, interjection)"
+      },
+    {
+     "rule_id":183,
+       "description":"Stoney defines verbs for role /action: General terms that adapt depending on position"
+    },
+
+{
+       "rule_id":184,
+      "description":"Object Relation description:'Agathâpabi', culture specific designation of something from position(group/place)-people who stay across example."
+
+   },
+    {
+    "rule_id": 185,
+     "description":"Stoney verb, Active, to adjust modify (general ) adaiya îjuch"
+     },
+
+ {
+       "rule_id":186,
+ "description":"Property: The construction to show time or location of something -using 'gaîtogam'"
+     },
+        {
+              "rule_id":187,
+        "description":"Culture shows expression for location to show meaning or respect, by defining term and implication of term on language speaker-relation"
+
+      },
+     {
+    "rule_id":188,
+ "description":"Compound description to show a degree- with a role behaviour,  Verb (adjective phrase)"
+
+     },
+    {
+    "rule_id": 189,
+      "description":"State -being. Internal or External: adjective for degree/relative and comparative term(wanide- wanidabich)"
+
+     },
+      {
+          "rule_id": 190,
+            "description": "Construction : verb that shows implied condition with the active voice. Ex: accelerate self ninanayach , and n- inana y -ekiyach: show object condition and causative by a source distinction, active - object specify"
+      },
+
+         {
+             "rule_id":191,
+               "description":"The location as a positional and place marker, as a complex construction, defining (gaîtogam, positional)- location words for language,"
+
+        },
+         {
+           "rule_id": 192,
+     "description": "Stoney descriptive terms have context specific implication."
+        },
+       {
+    "rule_id":193,
+       "description":"Nouns-words -to reflect state as a description of condition : ex wâmnâyabi"
+
+         },
+        {
+            "rule_id": 194,
+            "description": "Stoney Noun or compound expressions defines location(object and relative positioning ) to language and speaker"
+     },
+
+      {
+     "rule_id": 195,
+      "description": "Cultural Specific Term for relative (other people) noun or noun phrases in Stoney show relations in family"
+        },
+{
+        "rule_id":196,
+         "description":"Action verb, using self imply changes-by doing: koskayaktawîch,"
+
+     }
+]
