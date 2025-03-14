@@ -812,6 +812,7 @@ trainer.train()
 This part sets up the GRPOEnvTrainer with the custom environment, rubric, dataset, model, and tokenizer. Key parameters to consider tuning, especially in low-resource settings, are in training_args.
 
 ## Running the Example (Not Built Yet)
+- The idea here is to get completely away from the OpenAI fine tuning I use now to any open source model. The idea I'm going to build here is to give any community the tool to input their language as they understand it, train that model on any opensource model, likey with LoRA, and achieve better and better output. 
 
 Install Dependencies: Make sure you have the required packages installed (see your original pyproject.toml). Notably: sentence-transformers torch transformers. Use uv or other packaging method.
 
