@@ -72,7 +72,7 @@ By following this code, you can build a model for any low-resource language. The
     - [Overview](#overview)
     - [Key Concepts](#key-concepts)
     - [Code Structure and Components](#code-structure-and-components)
-    - [Running the Example](#running-the-example)
+    - [Running the Example (Not Built Yet)](#running-the-example-not-built-yet)
     - [Adapting to Your Specific Low-Resource Task](#adapting-to-your-specific-low-resource-task)
 
 ---
@@ -811,7 +811,7 @@ trainer.train()
 
 This part sets up the GRPOEnvTrainer with the custom environment, rubric, dataset, model, and tokenizer. Key parameters to consider tuning, especially in low-resource settings, are in training_args.
 
-## Running the Example
+## Running the Example (Not Built Yet)
 
 Install Dependencies: Make sure you have the required packages installed (see your original pyproject.toml). Notably: sentence-transformers torch transformers. Use uv or other packaging method.
 
