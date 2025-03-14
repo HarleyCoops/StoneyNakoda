@@ -74,6 +74,7 @@ By following this code, you can build a model for any low-resource language. The
     - [Code Structure and Components](#code-structure-and-components)
     - [Running the Example (Not Built Yet)](#running-the-example-not-built-yet)
     - [Adapting to Your Specific Low-Resource Task](#adapting-to-your-specific-low-resource-task)
+    - [Generating Reward Functions from Language Patterns](#generating-reward-functions-from-language-patterns)
 
 ---
 
@@ -833,3 +834,11 @@ Model: Choose a suitable pre-trained translation model for your languages.
 is_completed and Hints. Change these parts to improve hints.
 
 Hyperparameters: Experiment with the GRPOConfig parameters. Start with a low learning rate and consider increasing beta (the KL divergence penalty) to prevent overfitting on a small dataset. A larger beta keeps the model's weights closer to the pre-trained values.
+
+## Generating Reward Functions from Language Patterns
+
+One idea I have for generating a series of reward functions on a low resource language is to simply pass the JSON dictionary of the Stoney Nakoda, and ask for the rules or patterns the LLM notices. 
+
+It will give you a full set of rules that you can then use to define a very large number of very small reward functions that can be used to very precisely fine tune even low resource languages around contours. 
+
+Here is the actual LLM output using this simple idea: C:\Users\admin\StoneyNakoda\RLHFrules.json
