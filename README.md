@@ -68,12 +68,7 @@ By following this code, you can build a model for any low-resource language. The
     - [Future Directions](#future-directions)  
     - [Glossary](#glossary)  
 15. [March 2025 RL Update](#march-2025-rl-update)
-    - [Reinforcement Learning from Community Feedback](#reinforcement-learning-from-community-feedback)
-    - [Implementation Details](#implementation-details)
-    - [Results](#results)
-    - [Community Engagement Metrics](#community-engagement-metrics)
-    - [Next Steps](#next-steps)
-16. [Adapting Verifiers for Low-Resource Language Translation](#adapting-verifiers-for-low-resource-language-translation)
+    - [Adapting Verifiers for Low-Resource Language Translation](#adapting-verifiers-for-low-resource-language-translation)
     - [Overview](#overview)
     - [Key Concepts](#key-concepts)
     - [Code Structure and Components](#code-structure-and-components)
@@ -524,32 +519,316 @@ From a tiny dictionary to an AI that:
 -   **LoRA**: Low-Rank Adaptation
 -   **Community-in-the-Loop**: Paradigm of continuous human-guided refinement
 
-This RL update represents a significant step forward in our mission to preserve and revitalize the Stoney Nakoda language through AI-assisted, community-driven approaches.
-
 ---
 
 ## March 2025 RL Update
 
-### Reinforcement Learning from Community Feedback
+# Adapting Verifiers for Low-Resource Language Translation
 
-### Implementation Details
+This document details how to adapt the `verifiers` framework, originally designed for verifiable environments like math and coding, to the task of low-resource language translation.  This approach focuses on providing nuanced, multi-faceted rewards, going beyond simple correct/incorrect evaluations.
 
-### Results
+## Overview
 
-### Community Engagement Metrics
+The core idea is to treat translation as a multi-step process (even if it's just a single-turn translation) where the model receives rewards for various aspects of translation quality.  This allows for partial credit and provides more informative training signals, particularly beneficial in low-resource settings where data scarcity is a major challenge.
 
-### Next Steps
+We will be customizing the following components of the `verifiers` library:
 
----
+*   **Environment:** A custom `TranslationEnv` to handle the interaction with the translation model (LLM).
+*   **Parser:** A simplified `TranslationParser` to extract the translated text from the LLM's output.  We won't require strict XML formatting for this task.
+*   **Rubric:**  A `TranslationRubric` containing several reward functions that evaluate different quality dimensions (letter accuracy, word accuracy, semantic similarity, and edit distance).
+*   **Training:** Using the `GRPOEnvTrainer` with our custom components and a small, low-resource translation dataset.
 
-## Adapting Verifiers for Low-Resource Language Translation
+## Key Concepts
 
-### Overview
+*   **Ground Truth:** A parallel corpus of source and target language sentences.  Essential for calculating rewards.  In low-resource scenarios, this might be a small, curated dataset.
+*   **Multi-faceted Reward:**  Instead of a single reward, we provide separate rewards for:
+    *   **Letter Accuracy:**  Proportion of correctly translated letters.
+    *   **Word Accuracy:** Proportion of correctly translated words (space-separated).
+    *   **Semantic Similarity:**  Uses pre-trained sentence embeddings (Sentence-BERT) to measure how close the *meaning* of the translation is to the ground truth, even if the exact words differ.
+    *   **Edit Distance Similarity.** Levenshtein distances.
+*   **Iterative Refinement (Optional):**  The environment can be designed to support multiple turns, allowing the LLM to refine its translation based on feedback (hints).  This example shows a rudimentary character by character suggestion technique, although a better version might provide hints more sparingly based on confidence scores.
+*   **Low-Resource Focus:**  The techniques are tailored for scenarios with limited training data. This involves using smaller, specialized translation models (rather than massive general-purpose LLMs) and careful hyperparameter tuning (particularly `beta` in GRPO).
 
-### Key Concepts
+## Code Structure and Components
 
-### Code Structure and Components
+The code consists of the following main parts, each described in detail below:
 
-### Running the Example
+1.  **`TranslationParser`:** A class to extract the translation from the LLM's output string.
+2.  **`TranslationEnv`:**  A class inheriting from `MultiStepEnv` (or a simplified version) that defines the interaction loop between the trainer and the LLM.
+3.  **`TranslationRubric`:**  A class inheriting from `Rubric` that defines the reward functions.
+4.  **Dataset Creation (`create_dummy_dataset`):**  A function to load or create your low-resource translation dataset.  *You will replace this with your own dataset loading logic.*
+5.  **Model Loading (`get_model_and_tokenizer`):** Uses functions from `verifiers` to load a suitable pre-trained translation model.
+6.  **Training Setup (`GRPOEnvTrainer`):**  Sets up and runs the training process.
 
-### Adapting to Your Specific Low-Resource Task
+### 1. `TranslationParser`
+
+```python
+from types import SimpleNamespace
+
+class TranslationParser:
+    def parse(self, text: str, strip: bool = True) -> Any:
+        translation = text.strip()
+        return SimpleNamespace(translation=translation)
+```
+
+This simplified parser extracts the raw translated text from the LLM's output. We are not requiring or enforcing XML formatting, keeping the interaction straightforward.
+
+### 2. TranslationEnv
+
+```python
+import verifiers as vf
+from verifiers.envs import MultiStepEnv
+from verifiers.rubrics import Rubric  # Will be used later.
+from datasets import Dataset
+from typing import List, Dict, Any
+
+def check_prefix(text: str, suggested: str):
+    if len(suggested) < 1:
+        return False
+    return text.startswith(suggested[:len(text)])
+    
+class TranslationEnv(MultiStepEnv):
+    def __init__(self, dataset, system_prompt, max_steps=3):
+        super().__init__(system_prompt=system_prompt, max_steps=max_steps, mask_env_response=False)
+        self.dataset = dataset
+        self.rubric = None # Set during get_rubric
+
+    def get_dataset(self, **kwargs):
+        return self.dataset
+    def get_eval_dataset(self, **kwargs: Any):
+      return self.dataset  # You might want separate eval set.
+
+    def get_rubric(self):
+        if self.rubric is None:
+          self.rubric = TranslationRubric() # instantiate later.
+        return self.rubric
+
+    def is_completed(self, messages, **kwargs):
+       assistant_text = self.rubric.parser.parse(messages[-1]['content']).translation
+        user_query = self.get_last_user_prompt(messages)
+        ground_truth = self.dataset.filter(lambda x: x["prompt"][0]['content'] == user_query)
+        for element in ground_truth:
+            target = element['answer']
+
+        return check_prefix(target, assistant_text)
+
+    def get_last_user_prompt(self, messages):
+        i = len(messages) -1
+        while i > -1:
+           if messages[i]['role'] == 'user':
+               return messages[i]['content']
+           i-= 1
+        return None
+     # Suggest letters sequentially
+    def env_response(self, messages, **kwargs):
+        assistant_text = self.rubric.parser.parse(messages[-1]['content']).translation
+        user_query = self.get_last_user_prompt(messages)
+        ground_truth = self.dataset.filter(lambda x: x["prompt"][0]['content'] == user_query)
+
+        response = "Check your word beginnings:"
+        for element in ground_truth:
+          target = element['answer']
+          for i in range(0, min(len(target), len(assistant_text))):
+              if target[i] != assistant_text[i]:
+                   response += f" Your next correct letter choice starts with {target[i]}"
+        return {"role": "user", "content": response}
+```
+
+Key Functions:
+
+__init__: Initializes the environment with the dataset and system prompt. mask_env_response is set to False so suggestions/hints appear.
+
+get_dataset: Returns the training dataset.
+
+get_eval_dataset: Gets eval dataset
+
+get_rubric: Returns an instance of the TranslationRubric.
+
+is_completed: Checks if translation matches target, to terminate an interaction. We use custom checking logic by suggesting prefix matching, enabling hints, and then do similarity comparisons.
+
+env_response Uses basic sequential suggestion algorithm. It will guide completion letter-by-letter if LLM fails.
+
+### 3. TranslationRubric
+
+```python
+from verifiers.rubrics import Rubric
+from sentence_transformers import SentenceTransformer
+import numpy as np
+from typing import List, Dict
+
+class TranslationRubric(Rubric):
+    def __init__(self, embedding_model_name: str = 'all-MiniLM-L6-v2'):
+        super().__init__()
+        self.parser = TranslationParser()
+        self.embedding_model = SentenceTransformer(embedding_model_name)
+        self.reward_funcs = [
+            self.letter_accuracy_reward_func,
+            self.word_accuracy_reward_func,
+            self.semantic_similarity_reward_func,
+            self.levenshtein_distance_reward_func,
+        ]
+
+    def letter_accuracy_reward_func(self, completions, answer, **kwargs) -> List[float]:
+        rewards = []
+        for completion, target in zip(completions, answer):
+            completion_text = self.parser.parse(completion[0]["content"]).translation
+            target_text = target.strip()
+
+            min_len = min(len(completion_text), len(target_text))
+            correct_letters = sum(1 for c1, c2 in zip(completion_text, target_text) if c1 == c2)
+            reward = correct_letters / max(len(target_text), 1)  # Avoid division by zero
+
+            rewards.append(reward)
+        return rewards
+
+    def word_accuracy_reward_func(self, completions, answer, **kwargs) -> List[float]:
+        rewards = []
+        for completion, target in zip(completions, answer):
+            completion_text = self.parser.parse(completion[0]["content"]).translation
+            target_words = target.strip().split()
+            completion_words = completion_text.split()
+
+            correct_words = sum(1 for cw in completion_words if cw in target_words)
+            reward = correct_words / max(len(target_words), 1)
+            rewards.append(reward)
+        return rewards
+
+    def semantic_similarity_reward_func(self, completions, answer, **kwargs) -> List[float]:
+      rewards = []
+      for completion, target in zip(completions, answer):
+          completion_text = self.parser.parse(completion[0]["content"]).translation
+          target_text = target.strip()
+
+          try:
+              completion_embedding = self.embedding_model.encode(completion_text, convert_to_numpy=True)
+              target_embedding = self.embedding_model.encode(target_text, convert_to_numpy=True)
+              # Cosine similarity
+              similarity = np.dot(completion_embedding, target_embedding) / (np.linalg.norm(completion_embedding) * np.linalg.norm(target_embedding))
+              rewards.append(max(0, similarity))  # Clip to be >= 0
+          except Exception as e:
+            print("Error during semantic similarity", e)
+            rewards.append(0.0)
+      return rewards
+
+    def levenshtein_distance_reward_func(self, completions, answer, **kwargs) -> List[float]:
+        def levenshtein_distance(s1, s2):
+          if len(s1) > len(s2):
+            s1, s2 = s2, s1
+          distances = range(len(s1) + 1)
+          for i2, c2 in enumerate(s2):
+            distances_ = [i2+1]
+            for i1, c1 in enumerate(s1):
+              if c1 == c2:
+                  distances_.append(distances[i1])
+              else:
+                  distances_.append(1 + min((distances[i1], distances[i1 + 1], distances_[-1])))
+            distances = distances_
+          return distances[-1]
+
+        rewards = []
+        for completion, target in zip(completions, answer):
+          completion_text = self.parser.parse(completion[0]["content"]).translation
+          target_text = target.strip()
+          distance = levenshtein_distance(completion_text, target_text)
+          normalized_distance =  distance / max(len(completion_text), len(target_text), 1) # Avoid division by zero
+          rewards.append(1.0 - normalized_distance)
+        return rewards
+```
+
+Key Components:
+
+__init__: Initializes the rubric with a TranslationParser and a Sentence-BERT model for semantic similarity calculations. You can change the embedding_model_name to use different pre-trained embeddings.
+
+letter_accuracy_reward_func: Calculates the proportion of correct letters.
+
+word_accuracy_reward_func: Calculates the proportion of correct words.
+
+semantic_similarity_reward_func: Calculates the cosine similarity between the sentence embeddings of the generated translation and the ground truth.
+
+levenshtein_distance_reward_func: Provides similarity based on edit distances
+
+### 4. Dataset Creation (create_dummy_dataset)
+
+```python
+from datasets import Dataset
+import verifiers as vf
+
+def create_dummy_dataset():
+  data = {
+      'prompt': [
+        vf.format_prompt("Translate to French: 'The cat is on the mat.'", "You are a translation expert."),
+        vf.format_prompt("Translate to French: good morning", "You are a translation expert.")
+      ],
+      'answer': ["Le chat est sur le tapis.", "Bonjour"]
+  }
+  return Dataset.from_dict(data)
+```
+
+Important: This is a placeholder. You'll need to replace this with code that loads your low-resource parallel text dataset and creates a Hugging Face Dataset object with 'prompt' and 'answer' columns. The 'prompt' should contain the source sentence and any system prompt, and the 'answer' should contain the target translation.
+
+### 5. Model Loading (get_model_and_tokenizer)
+
+```python
+import verifiers as vf
+
+model_name = "Helsinki-NLP/opus-mt-en-fr"  # Example: English to French
+model, tokenizer = vf.get_model_and_tokenizer(model_name)
+```
+
+This uses the verifiers utility functions to load a pre-trained translation model and its corresponding tokenizer. Choose a model appropriate for your language pair. Start with smaller models for efficiency, especially in a low-resource setting.
+
+### 6. Training Setup (GRPOEnvTrainer)
+
+```python
+from verifiers.trainers.grpo_env_trainer import GRPOEnvTrainer
+
+# Create dataset instances.  YOU WILL REPLACE create_dummy_dataset!
+train_dataset = create_dummy_dataset()
+eval_dataset = create_dummy_dataset()
+
+# Set up environment and rubric.
+vf_env = TranslationEnv(dataset=train_dataset, system_prompt="You are a translation expert.")
+rubric = vf_env.get_rubric()  # Get the rubric *from* the environment
+
+run_name = "translation_example"
+# set training to be short
+training_args = vf.get_default_grpo_config(run_name=run_name, num_gpus=8)
+training_args.num_generations = 1 # reduce data
+training_args.max_steps = 3       # Short training for illustration
+
+trainer = GRPOEnvTrainer(
+    model=model,
+    tokenizer=tokenizer,
+    env=vf_env,
+    reward_funcs=rubric.reward_funcs,
+    args=training_args,
+    train_dataset=train_dataset,
+   # eval_dataset=eval_dataset
+)
+
+trainer.train()
+```
+
+This part sets up the GRPOEnvTrainer with the custom environment, rubric, dataset, model, and tokenizer. Key parameters to consider tuning, especially in low-resource settings, are in training_args.
+
+## Running the Example
+
+Install Dependencies: Make sure you have the required packages installed (see your original pyproject.toml). Notably: sentence-transformers torch transformers. Use uv or other packaging method.
+
+Run the Code: Combine the code snippets above into a single Python file (e.g., translation_trainer.py). Execute the script:
+
+```bash
+python translation_trainer.py
+```
+
+This will run a very short training demonstration on the dummy dataset. You should see output from the trainer and (if you enable logging) see the prompts, completions, and the calculated rewards.
+
+## Adapting to Your Specific Low-Resource Task
+
+Dataset: Replace create_dummy_dataset() with your data loading.
+
+Model: Choose a suitable pre-trained translation model for your languages.
+
+is_completed and Hints. Change these parts to improve hints.
+
+Hyperparameters: Experiment with the GRPOConfig parameters. Start with a low learning rate and consider increasing beta (the KL divergence penalty) to prevent overfitting on a small dataset. A larger beta keeps the model's weights closer to the pre-trained values.
