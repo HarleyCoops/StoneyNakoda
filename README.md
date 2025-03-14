@@ -841,4 +841,4 @@ One idea I have for generating a series of reward functions on a low resource la
 
 It will give you a full set of rules that you can then use to define a very large number of very small reward functions that can be used to very precisely fine tune even low resource languages around contours. 
 
-Here is the actual LLM output using this simple idea: C:\Users\admin\StoneyNakoda\RLHFrules.json
+Here is the actual LLM output using this simple idea: [RLHFrules.json](RLHFrules.json)
