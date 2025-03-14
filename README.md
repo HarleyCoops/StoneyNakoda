@@ -67,6 +67,18 @@ By following this code, you can build a model for any low-resource language. The
     - [Monitoring & QA](#monitoring--qa)  
     - [Future Directions](#future-directions)  
     - [Glossary](#glossary)  
+15. [March 2025 RL Update](#march-2025-rl-update)
+    - [Reinforcement Learning from Community Feedback](#reinforcement-learning-from-community-feedback)
+    - [Implementation Details](#implementation-details)
+    - [Results](#results)
+    - [Community Engagement Metrics](#community-engagement-metrics)
+    - [Next Steps](#next-steps)
+16. [Adapting Verifiers for Low-Resource Language Translation](#adapting-verifiers-for-low-resource-language-translation)
+    - [Overview](#overview)
+    - [Key Concepts](#key-concepts)
+    - [Code Structure and Components](#code-structure-and-components)
+    - [Running the Example](#running-the-example)
+    - [Adapting to Your Specific Low-Resource Task](#adapting-to-your-specific-low-resource-task)
 
 ---
 
@@ -511,3 +523,33 @@ From a tiny dictionary to an AI that:
 -   **Distillation Triplet**: (Prompt, Flawed Reply, Narrative Reply)
 -   **LoRA**: Low-Rank Adaptation
 -   **Community-in-the-Loop**: Paradigm of continuous human-guided refinement
+
+This RL update represents a significant step forward in our mission to preserve and revitalize the Stoney Nakoda language through AI-assisted, community-driven approaches.
+
+---
+
+## March 2025 RL Update
+
+### Reinforcement Learning from Community Feedback
+
+### Implementation Details
+
+### Results
+
+### Community Engagement Metrics
+
+### Next Steps
+
+---
+
+## Adapting Verifiers for Low-Resource Language Translation
+
+### Overview
+
+### Key Concepts
+
+### Code Structure and Components
+
+### Running the Example
+
+### Adapting to Your Specific Low-Resource Task
