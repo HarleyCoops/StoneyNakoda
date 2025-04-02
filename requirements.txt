@@ -11,7 +11,6 @@ google-cloud-storage>=2.10.0  # For Google Cloud storage
 
 # Data processing
 tensorflow>=2.13.0    # Core ML framework
-tensorflow-text>=2.13.0  # Text processing utilities
 torch>=2.0.0         # PyTorch for some model operations
 transformers>=4.30.0  # Hugging Face transformers
 
