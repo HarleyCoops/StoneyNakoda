@@ -65,6 +65,7 @@ By following this code, you can build a model for any low-resource language. The
     - [Monitoring & QA](#monitoring--qa)  
     - [Future Directions](#future-directions)  
     - [Glossary](#glossary)  
+15. [StoneyNakoda 42K Dictionary - April 2025](#stoney-nakoda-42k-dictionary---april-2025)
 
 ---
 
@@ -138,8 +139,8 @@ The Role of Cosine Similarity in AI Learning
 Iterative Refinement
 Through repeated feedback and fine-tuning, the AI improves its ability to place Stoney words correctly, not just individually but in the context of sentences and paragraphs. Over time, it develops a detailed, dynamic map of the Stoney language, with words clustered according to their community-informed meanings and uses.
 
-Although this is not cosine similarity, you can see the relationships among words can concepts in Stoney as I have mapped them here: https://atlas.nomic.ai/data/harleycoops/stoney-nakoda-language-synthetic/map/5c87caaf-6be0-4546-9e83-826569070b24#nqlL
-
+### StoneyNakoda 42K Dictionary - April 2025
+[![StoneyNakoda 42K Dictionary - April 2025 Nomic Atlas Map](Public/StoneyNakoda42k.jpg)](https://atlas.nomic.ai/data/harleycoops/stoney-nakoda-language-synthetic/map/5c87caaf-6be0-4546-9e83-826569070b24#JI7c)
 
 ---
 
