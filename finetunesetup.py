@@ -1,54 +1,78 @@
 import json
-import glob
 import random
+import os
+import logging
 
-def prepare_fine_tuning_data(input_dir, output_file):
+# Set up logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
+def prepare_fine_tuning_data(input_file: str, output_dir: str):
+    """
+    Converts a JSONL file of Q&A pairs to the OpenAI fine-tuning format,
+    then splits it into training and validation sets.
+    """
+    # Ensure output directory exists
+    os.makedirs(output_dir, exist_ok=True)
+
+    output_train_file = os.path.join(output_dir, "stoney_train.jsonl")
+    output_valid_file = os.path.join(output_dir, "stoney_valid.jsonl")
+
     data = []
-    for file in glob.glob(f"{input_dir}/*.jsonl"):
-        with open(file, 'r', encoding='utf-8') as f:
+    logger.info(f"Reading and converting data from {input_file}...")
+    try:
+        with open(input_file, 'r', encoding='utf-8') as f:
             for line in f:
                 try:
                     entry = json.loads(line.strip())
-                    english_word = entry['english_word']
+                    question = entry.get("question")
+                    answer = entry.get("answer")
                     
+                    if not question or not answer:
+                        logger.warning(f"Skipping entry with missing 'question' or 'answer': {entry}")
+                        continue
+
                     messages = [
-                        {"role": "system", "content": "You are learning the Stoney Nakoda language. Pay close attention to language structure and offer translations or explanations as asked. You can explain the thought process in your reply."},
-                        {"role": "user", "content": f"Translate and explain the Stoney version of this word: {english_word}"},
-                        {"role": "assistant", "content": f"The English word '{english_word}' has the following Stoney translations:\n" + 
-                         "\n".join([f"- {version['word']} ({version['grammatical_classification']}): {version['meaning']}" for version in entry['stoney_versions']])}
+                        {"role": "system", "content": "You are a bilingual Stoney-English assistant. You have been fine-tuned on a comprehensive set of Stoney Nakoda language data. Your purpose is to provide accurate translations, explain grammatical concepts, and offer cultural context when appropriate. Respond concisely and accurately."},
+                        {"role": "user", "content": question},
+                        {"role": "assistant", "content": answer}
                     ]
-                    
                     data.append({"messages": messages})
                 except json.JSONDecodeError:
-                    print(f"Skipping invalid JSON in file {file}")
+                    logger.warning(f"Skipping invalid JSON line in {input_file}")
                 except KeyError as e:
-                    print(f"Skipping entry with missing key {e} in file {file}")
+                    logger.warning(f"Skipping entry with missing key {e} in {input_file}")
 
-    # Add some sentence-level examples if available
-    # This is just a placeholder - you'd need to create these examples
-    sentence_examples = [
-        {"messages": [
-            {"role": "system", "content": "You are a helpful assistant that translates English sentences to Stoney Nakoda and provides explanations."},
-            {"role": "user", "content": "Translate this English sentence to Stoney: 'The sun is setting.'"},
-            {"role": "assistant", "content": "The English sentence 'The sun is setting.' translates to Stoney Nakoda as:\n\nWí kȟá iyáya.\n\nExplanation:\n- Wí: sun\n- kȟá: towards\n- iyáya: to go\n\nLiterally, this translates to 'The sun is going away,' which is how the concept of sunset is expressed in Stoney Nakoda."}
-        ]},
-        # Add more sentence examples here in the same format
-    ]
-    data.extend(sentence_examples)
+    except FileNotFoundError:
+        logger.error(f"Input file not found: {input_file}")
+        return
 
+    if not data:
+        logger.error("No data was processed. Exiting.")
+        return
+
+    # Shuffle and split the data
+    logger.info(f"Successfully converted {len(data)} entries. Shuffling and splitting data...")
     random.shuffle(data)
-    train_data = data[:int(len(data) * 0.8)]
-    valid_data = data[int(len(data) * 0.8):]
+    split_index = int(len(data) * 0.8)
+    train_data = data[:split_index]
+    valid_data = data[split_index:]
 
-    with open(f"{output_file}_train.jsonl", 'w', encoding='utf-8') as f:
+    # Write training data
+    with open(output_train_file, 'w', encoding='utf-8') as f:
         for item in train_data:
             f.write(json.dumps(item, ensure_ascii=False) + '\n')
+    logger.info(f"Wrote {len(train_data)} lines to training file: {output_train_file}")
 
-    with open(f"{output_file}_valid.jsonl", 'w', encoding='utf-8') as f:
+    # Write validation data
+    with open(output_valid_file, 'w', encoding='utf-8') as f:
         for item in valid_data:
             f.write(json.dumps(item, ensure_ascii=False) + '\n')
+    logger.info(f"Wrote {len(valid_data)} lines to validation file: {output_valid_file}")
 
-    print(f"Training file created: {output_file}_train.jsonl")
-    print(f"Validation file created: {output_file}_valid.jsonl")
+    logger.info("Data preparation complete.")
 
-prepare_fine_tuning_data("English.Data", "stoney_dictionary")
+if __name__ == "__main__":
+    input_qa_file = "Dictionaries/bilingual_training_set.jsonl"
+    output_directory = "OpenAIFineTune/"
+    prepare_fine_tuning_data(input_qa_file, output_directory)
