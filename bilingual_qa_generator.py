@@ -28,7 +28,7 @@ class BilingualQAGenerator:
             raise ValueError("GOOGLE_API_KEY not found in environment variables")
         
         genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel('gemini-2.0-exp')
+        self.model = genai.GenerativeModel('gemini-1.0-pro')
         self.english_dict_file = Path(english_dict_file)
         self.stoney_dict_file = Path(stoney_dict_file)
         
@@ -79,10 +79,9 @@ class BilingualQAGenerator:
 
     def generate_qa_pairs(self, dictionary_file: Path, is_english: bool, context_size: int = 5) -> Generator[Dict, None, None]:
         entries_buffer = []
-        total_entries = sum(1 for _ in open(dictionary_file, 'r', encoding='utf-8'))
         
         with open(dictionary_file, 'r', encoding='utf-8') as f:
-            for line in tqdm(f, total=total_entries, desc=f"Processing {'English' if is_english else 'Stoney'} entries"):
+            for line in tqdm(f, desc=f"Processing {'English' if is_english else 'Stoney'} entries"):
                 try:
                     entry = json.loads(line.strip())
                     entries_buffer.append(entry)
@@ -104,10 +103,12 @@ class BilingualQAGenerator:
                         Do not include any additional text or formatting."""
                         
                         try:
+                            logger.info(f"Sending request to Google API with {len(entries_buffer)} entries...")
                             response = self.model.generate_content(
                                 contents=context + "\n" + prompt
                             )
-                            response_text = response.strip()
+                            logger.info("Received response from Google API.")
+                            response_text = response.text.strip()
                             if not response_text.startswith('['):
                                 response_text = response_text[response_text.find('['):]
                             if not response_text.endswith(']'):
@@ -190,9 +191,9 @@ class BilingualQAGenerator:
 def main():
     try:
         # Set up our file paths
-        english_dict_path = "english_dictionary.jsonl"
-        stoney_dict_path = "stoney_dictionary.jsonl"
-        output_path = "bilingual_training_set.jsonl"
+        english_dict_path = "Dictionaries/english_dictionary.jsonl"
+        stoney_dict_path = "Dictionaries/stoney_dictionary.jsonl"
+        output_path = "Dictionaries/bilingual_training_set.jsonl"
         
         # Create our question generator
         generator = BilingualQAGenerator(english_dict_path, stoney_dict_path)
