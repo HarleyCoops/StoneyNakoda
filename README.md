@@ -154,7 +154,7 @@ Although this is not cosine similarity, you can see the relationships among word
 [![Stoney Nakoda Language Map in Nomic Atlas](Public/nomic_atlas_preview.jpg)](https://atlas.nomic.ai/data/harleycoops/stoney-1/map/8049523d-b620-4da3-962c-c509e08f586f#iE2b)
 
 ### StoneyNakoda 42K Dictionary - April 2025
-[![StoneyNakoda 42K Dictionary - April 2025 Nomic Atlas Map](Public/StoneyNakoda42k.jpg)](https://atlas.nomic.ai/data/harleycoops/stoney-nakoda-language-synthetic/map/5c87caaf-6be0-4546-9e83-826569070b24#JI7c)
+[![StoneyNakoda 42K Dictionary - April 2025 Nomic Atlas Map](Public/StoneyNakoda42k.jpg)](https://atlas.nomic.ai/data/harleycoops/stoney-nakoda-language-synthetic/map/5c87caaf-6be0-4546-9e83-826569070b24#VyjE)
 
 ---
 
@@ -247,9 +247,15 @@ pip install -r requirements.txt
 ```bash
 # Copy example environment file
 cp .env.example .env
-# Provide OPENAI_API_KEY, GOOGLE_API_KEY in .env
+# Provide OPENAI_API_KEY and GOOGLE_API_KEY in .env
+# Add HUGGINGFACE_* keys to auto-publish datasets and WANDB_* keys for training telemetry (see notes below)
+# Optionally set OPENAI_RESPONSES_MODEL / STONEY_*_MODEL overrides if you want a different Responses API model
+# (see https://platform.openai.com/docs/guides/migrate-to-responses for the latest guidance)
 
 ```
+
+-   Set `HUGGINGFACE_TOKEN`, `HUGGINGFACE_DATASET_REPO`, and (optionally) `HUGGINGFACE_DATASET_PRIVATE` to push the fine-tuning JSONL files to Hugging Face Datasets automatically.
+-   Set `WANDB_API_KEY`, `WANDB_PROJECT`, and (optionally) `WANDB_ENTITY` / `WANDB_RUN_NAME` to stream OpenAI fine-tuning telemetry to Weights & Biases.
 
 ### Initialization
 
@@ -289,9 +295,10 @@ python openai_finetune.py
 
 ```
 
--   Uploads files to OpenAI
--   Monitors fine-tuning progress
--   Implements checkpointing & logs
+-   Publishes the fine-tuning dataset to Hugging Face Datasets when `HUGGINGFACE_*` variables are configured.
+-   Uploads files to OpenAI and starts the fine-tuning job.
+-   Streams status and metrics to Weights & Biases when `WANDB_*` variables are provided.
+-   Implements checkpointing & logs.
 
 ----------
 
@@ -845,3 +852,40 @@ One idea I have for generating a series of reward functions on a low resource la
 It will give you a full set of rules that you can then use to define a very large number of very small reward functions that can be used to very precisely fine tune even low resource languages around contours. 
 
 Here is the actual LLM output using this simple idea: [RLHFrules.json](RLHFrules.json)
+
+### April 2025 - Stoney Grammar RL Pipeline
+
+The borrowed RL Grammar Gym workflow now lives in this repo with Stoney-specific code and assets. The dictionary-to-fine-tune path is untouched; this pipeline is an additional branch that starts from the grammar PDF (`Stoney; A Grammar of the Stony Language.pdf`) and produces reinforcement-learning tasks.
+
+#### Three automated stages (all Stoney-aware)
+
+1. **Vision/Linguistic extraction**  
+   `stoney_rl_grammar/pdf_ingest.py` renders each PDF page to an image, and `stoney_rl_grammar/rule_extractor.py` sends that page image to the OpenAI Responses API (default `gpt-5`, set in `.env`) to pull structured grammar rules straight from the scans.
+
+2. **Rule organisation**  
+   `stoney_rl_grammar/rule_organizer.py` filters low-confidence or duplicate rules and builds a compact catalogue the RL tooling can consume.
+
+3. **RL task generation**  
+   `stoney_rl_grammar/task_generator.py` turns each curated rule into 3-6 morphology, translation, or pattern-identification tasks for the forthcoming verifier environments.
+
+Run all stages end-to-end:
+
+```bash
+python run_stoney_grammar_pipeline.py
+```
+
+Outputs stay inside this project:
+
+| Stage | Path | Notes |
+| ----- | ---- | ----- |
+| Raw chunk extractions | `data/grammar_extracted_stoney/` | One JSON file per PDF chunk with the extracted rules |
+| Curated rule set | `data/rl_training_rules_stoney.json` | Summary + high-confidence Stoney rules |
+| RL task dataset | `data/training_datasets_stoney.jsonl` | Ready for integration with your verifiers/reward functions |
+
+Environment configuration comes from `.env`:
+
+- Set `OPENAI_API_KEY` before running.  
+- Override `OPENAI_RESPONSES_MODEL`, `STONEY_EXTRACTION_MODEL`, or `STONEY_TASK_MODEL` if you want a specific Responses API model (e.g. `gpt-4.1` for heavier vision reasoning).  
+- See https://platform.openai.com/docs/guides/migrate-to-responses for current API behaviour.
+
+> The legacy dictionary extraction/fine-tuning scripts remain unchanged, so you can keep running those while iterating on the grammar RL pipeline in parallel.
