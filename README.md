@@ -933,6 +933,53 @@ Training on qualitative, non-coding prompts is now a first-class feature:
 - **Curriculum Scheduling** â€“ upcoming experiments will weight reward components differently per difficulty tier, emphasizing morphology early and semantic nuance later.  
 - **Community Review Loops** â€“ JSON artefacts will gain review status flags so native speakers can approve or veto tasks before they land in production runs.  
 - **Cross-Language Transfer** â€“ the same pipeline can ingest Dakota or Lakota scans with minimal configuration changes, enabling comparative Siouan grammar gyms.
+## October 2025 Grammar Gym Expansion
 
+The Stoney Nakoda grammar gym now operates as a fully automated, closed-loop RL system that is purpose-built for qualitative, non-coding language tasks. This expansion aligns the extraction code, the verifier environment, and the curriculum so that every training signal traces back to documented grammar and community-approved usage.
 
+### Closed-Loop Pipeline Overview
 
+1. **Extract** - `stoney_rl_grammar/pdf_ingest.py` and `stoney_rl_grammar/rule_extractor.py` convert each scanned page into structured rules with page provenance and confidence scores.
+2. **Curate** - `stoney_rl_grammar/rule_organizer.py` filters noise, deduplicates titles, and writes `data/rl_training_rules_stoney.json` with category counts for audit.
+3. **Fabricate Tasks** - `stoney_rl_grammar/task_generator.py` transforms every curated rule into 3-6 task prompts, capturing hints, regex verification, and difficulty labels.
+4. **Package Rewards** - `environments/stoney_nakoda_translation/stoney_nakoda_translation/environment.py` exposes exact-match, character-F1, and pattern rewards that reference the same rule metadata.
+5. **Train & Evaluate** - `prime-rl` runners load the packaged environment, while `bilingual_qa_generator.py` and `convert_data_format.py` keep supervised corpora aligned with the RL tasks.
+
+Every artifact is written to `data/` so linguists can review examples and optionally edit JSON before training begins.
+
+### Grammar Rule Construction and Traceability
+
+- Each `GrammarRule` object carries `rule_id`, source page, and chunk identifiers, allowing rule-level spot checks and regression tracking.
+- Verification hints capture affix boundaries, allowable morpheme shapes, or mandatory particles. These hints route into regex and checklist rewards so that the gym can grade morphology, not just surface translation.
+- Rule categories (morphology, syntax, phonology, translation, semantics, phonotactics) power curriculum filters. You can, for example, isolate phonology rules when debugging nasal consonant preservation.
+
+### Multi-Signal Reward Stack
+
+- **Exact Match** guards against hallucinated answers when the rule expects fixed forms (for example, imperative particles).
+- **Character F1** measures preservation of Dakota-derived orthography (š, ŋ, ć) as well as doubled vowels.
+- **Pattern Reward** checks regex constraints and falls back to hint coverage, scoring partial compliance for multi-step tasks.
+- Because the environment keeps rewards independent, you can weight or ablate them when experimenting with new models or curriculum schedules.
+
+### Qualitative RL for Cultural Competence
+
+Training on qualitative, non-coding prompts is now a first-class feature:
+
+- Task generator prompts request scenario-based instructions, storytelling completions, and grammatical explanations alongside raw translations.
+- Hints encode cultural notes supplied by community reviewers, allowing the gym to reward answers that incorporate respectful phrasing or kinship markers.
+- This design lets GRPO optimize for linguistic accuracy *and* cultural nuance without hard-coding rubric logic in Python.
+- Synthetic QA pairs produced by `bilingual_qa_generator.py` mirror these qualitative formats so supervised fine-tuning and RL training reinforce one another.
+
+### Operational Checklist
+
+1. Set `.env` keys (`OPENAI_API_KEY`, `GOOGLE_API_KEY`, optional model overrides).
+2. Run `python run_stoney_grammar_pipeline.py` to refresh rule, task, and dataset outputs.
+3. Inspect `data/rl_training_rules_stoney.json` and `data/training_datasets_stoney.jsonl` for spot checks.
+4. Install the environment package: `pip install -e environments/stoney_nakoda_translation`.
+5. Launch GRPO training with PrimeIntellect or your preferred RL harness, pointing to the generated dataset.
+6. After training, evaluate qualitative prompts (stories, explanations, cultural etiquette) to validate that non-coding tasks improve.
+
+### Research Outlook
+
+- **Curriculum Scheduling** - upcoming experiments will weight reward components differently per difficulty tier, emphasizing morphology early and semantic nuance later.
+- **Community Review Loops** - JSON artifacts will gain review status flags so native speakers can approve or veto tasks before they land in production runs.
+- **Cross-Language Transfer** - the same pipeline can ingest Dakota or Lakota scans with minimal configuration changes, enabling comparative Siouan grammar gyms.

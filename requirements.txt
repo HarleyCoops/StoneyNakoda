@@ -25,3 +25,4 @@ pymupdf>=1.24.0      # Render PDF pages to images
 tenacity>=8.2.0      # Resilient retries for API calls
 huggingface_hub>=0.24.0  # Publishing datasets/models to Hugging Face
 wandb>=0.17.0        # Experiment tracking and reporting
+verifiers>=0.1.5.dev1  # Prime Intellect environment scaffolding

@@ -1,0 +1,29 @@
+[project]
+name = "stoney-nakoda-translation"
+description = "Verifiers-compatible environment for Stoney Nakoda translation and grammar practice."
+version = "0.1.0"
+requires-python = ">=3.10"
+authors = [
+    { name = "Stoney Nakoda Language Lab", email = "language@stoney-nakoda.example" },
+]
+readme = "README.md"
+license = { text = "Apache-2.0" }
+keywords = ["stoney", "translation", "rl", "verifiers", "prime-intellect"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Topic :: Education",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "verifiers>=0.1.5.dev1",
+    "datasets>=2.20.0",
+]
+
+[project.urls]
+Repository = "https://github.com/HarleyCoops/StoneyNakoda"
+
+[tool.hatch.build.targets.wheel]
+packages = ["stoney_nakoda_translation"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
