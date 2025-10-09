@@ -1,4 +1,4 @@
-# From Whispers to Voices: A "Community-In-The-Loop" Proposal for Model Distillation and Language Preservation
+﻿# From Whispers to Voices: A "Community-In-The-Loop" Proposal for Model Distillation and Language Preservation
 
 A working model of the Stoney Nakoda language has been developed and is now available for community-in-the-loop testing in 2025:
 
@@ -72,10 +72,16 @@ By following this code, you can build a model for any low-resource language. The
     - [Overview](#overview)
     - [Key Concepts](#key-concepts)
     - [Code Structure and Components](#code-structure-and-components)
-    - [Running the Example (Not Built Yet)](#running-the-example-not-built-yet)
     - [Adapting to Your Specific Low-Resource Task](#adapting-to-your-specific-low-resource-task)
     - [Generating Reward Functions from Language Patterns](#generating-reward-functions-from-language-patterns)
-16. [StoneyNakoda 42K Dictionary - April 2025](#stoney-nakoda-42k-dictionary---april-2025)
+16. [StoneyNakoda 42K Dictionary](#stoney-nakoda-42k-dictionary)
+17. [October 2025 Grammar Gym Expansion](#october-2025-grammar-gym-expansion)
+    - [Closed-Loop Pipeline Overview](#closed-loop-pipeline-overview)
+    - [Grammar Rule Construction and Traceability](#grammar-rule-construction-and-traceability)
+    - [Multi-Signal Reward Stack](#multi-signal-reward-stack)
+    - [Qualitative RL for Cultural Competence](#qualitative-rl-for-cultural-competence)
+    - [Operational Checklist](#operational-checklist)
+    - [Research Outlook](#research-outlook)
 
 ---
 
@@ -102,7 +108,7 @@ Two key releases influenced my thinking of what was possible:
 1. [Meta's Llama-3 Model (April 18th, 2024)](https://www.reuters.com/technology/meta-releases-early-versions-its-llama-3-ai-model-2024-04-18/)  
 2. [OpenAI Fine-Tuning API (October 2024)](https://openai.com/index/api-model-distillation/)
 
-Both gave me the motivation to build what's presented here. The true innovation here lies in how communities can narratively correct the initially flawed response (about 10% of the time, the model works every time.) then that feeback be passed seamleslly back into the fine-tuning process. The [textbooks](https://globalnews.ca/news/9430501/stoney-nakota-language-textbook/) that the Stoney community created—intended as educational tools—became perfect concept of a model prompts, each chapter or word offering pure indigenous data devoid of external weights or biases to the fine-tuning process.
+Both gave me the motivation to build what's presented here. The true innovation here lies in how communities can narratively correct the initially flawed response (about 10% of the time, the model works every time.) then that feeback be passed seamleslly back into the fine-tuning process. The [textbooks](https://globalnews.ca/news/9430501/stoney-nakota-language-textbook/) that the Stoney community createdÎ“Ã‡Ã¶intended as educational toolsÎ“Ã‡Ã¶became perfect concept of a model prompts, each chapter or word offering pure indigenous data devoid of external weights or biases to the fine-tuning process.
 
 
 Early in 2023, I found an original, unpublished sketch by James Hector likely drawn in the summer of 1858 or 1859 along the Bow River in Southern Alberta:
@@ -123,7 +129,7 @@ Word Embeddings: Mapping Words in Space
 Word embeddings are like placing words in a high-dimensional map, where similar words are positioned closer together. For example, "strawberry," "orange," and "cherry" might form a cluster because they are fruits, while "laptop," "Microsoft," and "Android" might cluster elsewhere as tech-related terms. Each axis in this space represents a characteristic of the words, such as their context or meaning.
 
 Context Shapes Meaning
-A word's position in this space isn't fixed—it shifts based on context. For instance, the word "apple" could mean a fruit or the tech brand, depending on its surrounding words, like "buy" (tech) or "tree" (fruit). This dynamic placement captures the nuances of meaning.
+A word's position in this space isn't fixedÎ“Ã‡Ã¶it shifts based on context. For instance, the word "apple" could mean a fruit or the tech brand, depending on its surrounding words, like "buy" (tech) or "tree" (fruit). This dynamic placement captures the nuances of meaning.
 
 Cosine Similarity: Measuring Relationships
 Cosine similarity quantifies how similar two words are by measuring the angle between their vectors in the embedding space:
@@ -153,14 +159,14 @@ Although this is not cosine similarity, you can see the relationships among word
 
 [![Stoney Nakoda Language Map in Nomic Atlas](Public/nomic_atlas_preview.jpg)](https://atlas.nomic.ai/data/harleycoops/stoney-1/map/8049523d-b620-4da3-962c-c509e08f586f#iE2b)
 
-### StoneyNakoda 42K Dictionary - April 2025
-[![StoneyNakoda 42K Dictionary - April 2025 Nomic Atlas Map](Public/StoneyNakoda42k.jpg)](https://atlas.nomic.ai/data/harleycoops/stoney-nakoda-language-synthetic/map/5c87caaf-6be0-4546-9e83-826569070b24#VyjE)
+### StoneyNakoda 42K Dictionary
+[![StoneyNakoda 42K Dictionary Nomic Atlas Map](Public/StoneyNakoda42k.jpg)](https://atlas.nomic.ai/data/harleycoops/stoney-nakoda-language-synthetic/map/5c87caaf-6be0-4546-9e83-826569070b24#VyjE)
 
 ---
 
 ## Project Architecture
 
-This code forms a complete pipeline for training and deploying a Stoney model. It is fully functional—but not correct 100% of the time—and is designed to improve through Community-In-The-Loop feedback. Access the model here:  
+This code forms a complete pipeline for training and deploying a Stoney model. It is fully functionalÎ“Ã‡Ã¶but not correct 100% of the timeÎ“Ã‡Ã¶and is designed to improve through Community-In-The-Loop feedback. Access the model here:  
 [Stoney Language Model App](https://huggingface.co/spaces/HarleyCooper/StoneyApp)
 
 ### High-Level System Design
@@ -172,11 +178,11 @@ This code forms a complete pipeline for training and deploying a Stoney model. I
 
 ### Data Flow
 
-1. Raw dictionary data → Data Ingestion  
-2. Processed data → Q&A Generation  
-3. Generated Q&A pairs → Training Data Preparation  
-4. Prepared data → Model Fine-tuning  
-5. Fine-tuned model → Inference Interface  
+1. Raw dictionary data Î“Ã¥Ã† Data Ingestion  
+2. Processed data Î“Ã¥Ã† Q&A Generation  
+3. Generated Q&A pairs Î“Ã¥Ã† Training Data Preparation  
+4. Prepared data Î“Ã¥Ã† Model Fine-tuning  
+5. Fine-tuned model Î“Ã¥Ã† Inference Interface  
 
 ---
 
@@ -184,15 +190,15 @@ This code forms a complete pipeline for training and deploying a Stoney model. I
 
 ```
 PUBLICRELEASE/
-├── OpenAIFineTune/           # OpenAI fine-tuning files
-│   ├── stoney_train.jsonl    # Training dataset
-│   └── stoney_valid.jsonl    # Validation dataset
-├── checkpoints/              # Model checkpoints
-├── .env.example             # Env variables example
-├── requirements.txt         # Python dependencies
-├── english_dictionary.jsonl
-├── stoney_dictionary.jsonl
-└── bilingual_training_set.jsonl
+Î“Ã¶Â£Î“Ã¶Ã‡Î“Ã¶Ã‡ OpenAIFineTune/           # OpenAI fine-tuning files
+Î“Ã¶Ã©   Î“Ã¶Â£Î“Ã¶Ã‡Î“Ã¶Ã‡ stoney_train.jsonl    # Training dataset
+Î“Ã¶Ã©   Î“Ã¶Ã¶Î“Ã¶Ã‡Î“Ã¶Ã‡ stoney_valid.jsonl    # Validation dataset
+Î“Ã¶Â£Î“Ã¶Ã‡Î“Ã¶Ã‡ checkpoints/              # Model checkpoints
+Î“Ã¶Â£Î“Ã¶Ã‡Î“Ã¶Ã‡ .env.example             # Env variables example
+Î“Ã¶Â£Î“Ã¶Ã‡Î“Ã¶Ã‡ requirements.txt         # Python dependencies
+Î“Ã¶Â£Î“Ã¶Ã‡Î“Ã¶Ã‡ english_dictionary.jsonl
+Î“Ã¶Â£Î“Ã¶Ã‡Î“Ã¶Ã‡ stoney_dictionary.jsonl
+Î“Ã¶Ã¶Î“Ã¶Ã‡Î“Ã¶Ã‡ bilingual_training_set.jsonl
 ```
 
 ---
@@ -480,7 +486,7 @@ graph TD
 
 ### Cultural Integrity
 
-Every correction preserves cultural norms—idioms, humor, oral traditions—and ensures the community wields control over the AI's "mindset."
+Every correction preserves cultural normsÎ“Ã‡Ã¶idioms, humor, oral traditionsÎ“Ã‡Ã¶and ensures the community wields control over the AI's "mindset."
 
 ### Data Sources
 
@@ -503,7 +509,7 @@ From a tiny dictionary to an AI that:
 ### Example Workflow
 
 1.  **Prompt**: "How to say 'taste slightly with the tip of your tongue' in Stoney?"
-2.  **Model's Flawed Reply**: "`supthîyach`" (incorrect).
+2.  **Model's Flawed Reply**: "`supthâ”œÂ«yach`" (incorrect).
 3.  **Community Correction**: Shares the correct phrase plus a story from childhood.
 4.  **Distillation Triplet**: (Prompt, Disallowed, Narrative).
 5.  **LoRA Fine-Tuning**: Model adjusts swiftly.
@@ -822,19 +828,6 @@ trainer.train()
 
 This part sets up the GRPOEnvTrainer with the custom environment, rubric, dataset, model, and tokenizer. Key parameters to consider tuning, especially in low-resource settings, are in training_args.
 
-## Running the Example (Not Built Yet)
-- The idea here is to get completely away from the OpenAI fine tuning I use now to any open source model. The idea I'm going to build here is to give any community the tool to input their language as they understand it, train that model on any opensource model, likey with LoRA, and achieve better and better output. 
-
-Install Dependencies: Make sure you have the required packages installed (see your original pyproject.toml). Notably: sentence-transformers torch transformers. Use uv or other packaging method.
-
-Run the Code: Combine the code snippets above into a single Python file (e.g., translation_trainer.py). Execute the script:
-
-```bash
-python translation_trainer.py
-```
-
-This will run a very short training demonstration on the dummy dataset. You should see output from the trainer and (if you enable logging) see the prompts, completions, and the calculated rewards.
-
 ## Adapting to Your Specific Low-Resource Task
 
 Dataset: Replace create_dummy_dataset() with your data loading.
@@ -853,7 +846,7 @@ It will give you a full set of rules that you can then use to define a very larg
 
 Here is the actual LLM output using this simple idea: [RLHFrules.json](RLHFrules.json)
 
-### April 2025 - Stoney Grammar RL Pipeline
+### Stoney Grammar RL Pipeline (October 2025 Refresh)
 
 The borrowed RL Grammar Gym workflow now lives in this repo with Stoney-specific code and assets. The dictionary-to-fine-tune path is untouched; this pipeline is an additional branch that starts from the grammar PDF (`Stoney; A Grammar of the Stony Language.pdf`) and produces reinforcement-learning tasks.
 
@@ -889,3 +882,57 @@ Environment configuration comes from `.env`:
 - See https://platform.openai.com/docs/guides/migrate-to-responses for current API behaviour.
 
 > The legacy dictionary extraction/fine-tuning scripts remain unchanged, so you can keep running those while iterating on the grammar RL pipeline in parallel.
+
+## October 2025 Grammar Gym Expansion
+
+The Stoney Nakoda grammar gym now operates as a fully automated, closed-loop RL system that is purpose-built for qualitative, non-coding language tasks. This expansion aligns the extraction code, the verifier environment, and the curriculum so that every training signal traces back to documented grammar and community-approved usage.
+
+### Closed-Loop Pipeline Overview
+
+1. **Extract** â€“ `stoney_rl_grammar/pdf_ingest.py` and `stoney_rl_grammar/rule_extractor.py` convert each scanned page into structured rules with page provenance and confidence scores.  
+2. **Curate** â€“ `stoney_rl_grammar/rule_organizer.py` filters noise, deduplicates titles, and writes `data/rl_training_rules_stoney.json` with category counts for audit.  
+3. **Fabricate Tasks** â€“ `stoney_rl_grammar/task_generator.py` transforms every curated rule into 3-6 task prompts, capturing hints, regex verification, and difficulty labels.  
+4. **Package Rewards** â€“ `environments/stoney_nakoda_translation/stoney_nakoda_translation/environment.py` exposes exact-match, character-F1, and pattern rewards that reference the same rule metadata.  
+5. **Train & Evaluate** â€“ `prime-rl` runners load the packaged environment, while `bilingual_qa_generator.py` and `convert_data_format.py` keep supervised corpora aligned with the RL tasks.
+
+Every artefact is written to `data/` so linguists can review examples and optionally edit JSON before training begins.
+
+### Grammar Rule Construction and Traceability
+
+- Each `GrammarRule` object carries `rule_id`, source page, and chunk identifiers, allowing rule-level spot checks and regression tracking.  
+- Verification hints capture affix boundaries, allowable morpheme shapes, or mandatory particles. These hints route into regex and checklist rewards so that the gym can grade morphology, not just surface translation.  
+- Rule categories (morphology, syntax, phonology, translation, semantics, phonotactics) power curriculum filters. You can, for example, isolate phonology rules when debugging nasal consonant preservation.
+
+### Multi-Signal Reward Stack
+
+- **Exact Match** guards against hallucinated answers when the rule expects fixed forms (e.g., imperative particles).  
+- **Character F1** measures preservation of Dakota-derived orthography (Å¡, Å‹, Ä‡) as well as doubled vowels.  
+- **Pattern Reward** checks regex constraints and falls back to hint coverage, scoring partial compliance for multi-step tasks.  
+- Because the environment keeps rewards independent, you can weight or ablate them when experimenting with new models or curriculum schedules.
+
+### Qualitative RL for Cultural Competence
+
+Training on qualitative, non-coding prompts is now a first-class feature:
+
+- Task generator prompts request scenario-based instructions, storytelling completions, and grammatical explanations alongside raw translations.  
+- Hints encode cultural notes supplied by community reviewers, allowing the gym to reward answers that incorporate respectful phrasing or kinship markers.  
+- This design lets GRPO optimize for linguistic accuracy *and* cultural nuance without hard-coding rubric logic in Python.  
+- Synthetic QA pairs produced by `bilingual_qa_generator.py` mirror these qualitative formats so supervised fine-tuning and RL training reinforce one another.
+
+### Operational Checklist
+
+1. Set `.env` keys (`OPENAI_API_KEY`, `GOOGLE_API_KEY`, optional model overrides).  
+2. Run `python run_stoney_grammar_pipeline.py` to refresh rule, task, and dataset outputs.  
+3. Inspect `data/rl_training_rules_stoney.json` and `data/training_datasets_stoney.jsonl` for spot checks.  
+4. Install the environment package: `pip install -e environments/stoney_nakoda_translation`.  
+5. Launch GRPO training with PrimeIntellect or your preferred RL harness, pointing to the generated dataset.  
+6. After training, evaluate qualitative prompts (stories, explanations, cultural etiquette) to validate that non-coding tasks improve.
+
+### Research Outlook
+
+- **Curriculum Scheduling** â€“ upcoming experiments will weight reward components differently per difficulty tier, emphasizing morphology early and semantic nuance later.  
+- **Community Review Loops** â€“ JSON artefacts will gain review status flags so native speakers can approve or veto tasks before they land in production runs.  
+- **Cross-Language Transfer** â€“ the same pipeline can ingest Dakota or Lakota scans with minimal configuration changes, enabling comparative Siouan grammar gyms.
+
+
+
