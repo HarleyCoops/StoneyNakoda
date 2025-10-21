@@ -123,6 +123,108 @@ I think what this project has left me considering most is that a century from no
 
 **I am freely available to help any First Nation in Canada.**
 
+---
+
+## Quick Start: Running the Complete Stoney Pipeline
+
+### Prerequisites
+
+```bash
+# 1. Clone and navigate to repository
+cd StoneyNakoda
+
+# 2. Create virtual environment
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+
+# 3. Install dependencies
+pip install -r requirements.txt
+
+# 4. Configure API keys
+cp .env.example .env
+# Edit .env and add:
+#   OPENAI_API_KEY=sk-...
+#   GOOGLE_API_KEY=...
+# Optional: HUGGINGFACE_TOKEN, WANDB_API_KEY for publishing/tracking
+```
+
+### Full Pipeline Execution
+
+**Recommended Approach: Run Both Pipelines Sequentially**
+
+**Phase 1: Dictionary→Fine-tuning (Supervised Learning)**
+
+```bash
+# Step 1: Generate 150K Q&A pairs from dictionaries (takes several hours)
+python bilingual_qa_generator.py
+
+# Step 2: Convert to OpenAI format and split train/validation
+python finetunesetup.py
+
+# Step 3: Fine-tune model via OpenAI API (monitor in console)
+python openai_finetune.py
+# This will output a fine-tuned model ID when complete
+```
+
+**Phase 2: Grammar→RL (Reinforcement Learning)**
+
+```bash
+# Step 4: Extract grammar rules from PDF and generate RL tasks
+python run_stoney_grammar_pipeline.py
+
+# Step 5: Install custom RL environment
+pip install -e environments/stoney_nakoda_translation
+
+# Step 6: Run GRPO training with your RL framework
+# Use data/training_datasets_stoney.jsonl with prime-rl or similar
+```
+
+**Phase 3: Deploy and Iterate**
+
+```bash
+# Deploy your fine-tuned model to HuggingFace Spaces or API
+# Collect community feedback
+# Create distillation triplets (Prompt, Wrong Answer, Narrative Correction)
+# Re-train with LoRA on correction data
+```
+
+### Quick Pipeline Options
+
+**Option A: Dictionary Pipeline Only** (Fastest path to working model)
+```bash
+python bilingual_qa_generator.py && python finetunesetup.py && python openai_finetune.py
+```
+
+**Option B: Grammar RL Pipeline Only** (For grammatical precision)
+```bash
+python run_stoney_grammar_pipeline.py && pip install -e environments/stoney_nakoda_translation
+```
+
+### Expected Outputs
+
+After running both pipelines, you'll have:
+
+- `OpenAIFineTune/stoney_train.jsonl` & `stoney_valid.jsonl` (supervised training data)
+- Fine-tuned OpenAI model ID (from console output)
+- `data/rl_training_rules_stoney.json` (curated grammar rules)
+- `data/training_datasets_stoney.jsonl` (RL training tasks)
+- Custom RL environment installed and ready for GRPO training
+
+### Monitoring Progress
+
+- **Dictionary Pipeline**: Watch `tqdm` progress bars, check `Dictionaries/checkpoints/` for recovery points
+- **Fine-tuning**: Monitor OpenAI dashboard or W&B if configured
+- **Grammar Pipeline**: Check `data/grammar_extracted_stoney/*.json` for rule extraction quality
+
+### Cost Estimates
+
+- **Google Gemini API**: ~$5-15 for 150K Q&A generation (depends on model)
+- **OpenAI Fine-tuning**: ~$20-50 for GPT-4o-mini with 3 epochs
+- **Grammar Extraction**: ~$10-30 for vision model PDF processing
+- **Total**: ~$35-95 for complete pipeline
+
+---
+
 ## Understanding How AI Learns Stoney Words Using Cosine Similarity
 
 Word Embeddings: Mapping Words in Space
@@ -166,23 +268,60 @@ Although this is not cosine similarity, you can see the relationships among word
 
 ## Project Architecture
 
-This code forms a complete pipeline for training and deploying a Stoney model. It is fully functionalÎ“Ã‡Ã¶but not correct 100% of the timeÎ“Ã‡Ã¶and is designed to improve through Community-In-The-Loop feedback. Access the model here:  
+This code forms a complete **dual-pipeline system** for training and deploying Stoney models. Both pipelines are fully functional and designed to improve through Community-In-The-Loop feedback. Access the active model here:  
 [Stoney Language Model App](https://huggingface.co/spaces/HarleyCooper/StoneyApp)
+
+### Dual Pipeline Architecture (October 2025)
+
+The project now contains **two complementary training pathways**:
+
+**1. Dictionary→Fine-tuning Pipeline (Supervised Learning)**
+- Primary path for building conversational translation models
+- Uses dictionary data to generate diverse Q&A pairs via Google Gemini
+- Fine-tunes OpenAI models (GPT-4o-mini/GPT-4) for natural language fluency
+- **Best for**: Initial model deployment, general translation capability
+
+**2. Grammar→RL Pipeline (Reinforcement Learning)** **[October 2025 Addition]**
+- Extracts structured grammar rules from PDF scans using vision models
+- Generates verifiable RL training tasks with multi-signal rewards
+- Uses GRPO (Group Relative Policy Optimization) for precise linguistic tuning
+- **Best for**: Grammatical accuracy, morphology, cultural competence
 
 ### High-Level System Design
 
-1. **Data Ingestion Layer**  
-2. **Processing Pipeline** (Q&A generation, augmentation, conversion)  
-3. **Model Training Framework** (fine-tuning, hyperparameters, monitoring)  
-4. **Inference Interface** (API endpoint, response formatting, error handling)
+**Dictionary Pipeline:**
+1. **Data Ingestion Layer** (JSONL dictionaries)
+2. **Processing Pipeline** (Q&A generation via Gemini, format conversion)
+3. **Model Training Framework** (OpenAI fine-tuning, hyperparameters, monitoring)
+4. **Inference Interface** (HuggingFace deployment, API endpoint)
 
-### Data Flow
+**Grammar Pipeline:**
+1. **PDF Ingestion** (Grammar textbook → page images)
+2. **Vision Extraction** (OpenAI vision models → structured rules)
+3. **Task Generation** (Rules → RL training tasks with hints/verification)
+4. **RL Training** (GRPO with multi-faceted reward functions)
 
-1. Raw dictionary data Î“Ã¥Ã† Data Ingestion  
-2. Processed data Î“Ã¥Ã† Q&A Generation  
-3. Generated Q&A pairs Î“Ã¥Ã† Training Data Preparation  
-4. Prepared data Î“Ã¥Ã† Model Fine-tuning  
-5. Fine-tuned model Î“Ã¥Ã† Inference Interface  
+### Combined Data Flow
+
+```mermaid
+graph TD
+    A[Dictionary Files] --> B[Q&A Generation via Gemini]
+    B --> C[Training Data Preparation]
+    C --> D[OpenAI Fine-tuning]
+
+    E[Grammar PDF] --> F[PDF to Images]
+    F --> G[Vision Model Rule Extraction]
+    G --> H[Rule Organization]
+    H --> I[RL Task Generation]
+
+    D --> J[Stoney Translation Model]
+    I --> K[GRPO RL Training]
+    K --> J
+
+    J --> L[Community Feedback Loop]
+    L --> M[Iterative Refinement via LoRA]
+    M --> J
+```  
 
 ---
 
@@ -274,37 +413,92 @@ python initialize.py
 
 ## Detailed Usage Pipeline
 
-### 1. Generate Training Data
+The project supports **two independent pipelines** that can be run separately or combined:
+
+### Option A: Dictionary→Fine-tuning Pipeline (Recommended First)
+
+**Step 1: Generate Training Data**
 
 ```bash
 python bilingual_qa_generator.py
-
 ```
 
--   Processes `english_dictionary.jsonl` & `stoney_dictionary.jsonl`
--   Produces `bilingual_training_set.jsonl`
+-   Processes `Dictionaries/english_dictionary.jsonl` & `Dictionaries/stoney_dictionary.jsonl`
+-   Uses Google Gemini to generate 150,000 Q&A pairs (75K per language)
+-   Produces `Dictionaries/bilingual_training_set.jsonl`
+-   Creates checkpoints every 1000 pairs in `Dictionaries/checkpoints/`
 
-### 2. Prepare Fine-tuning Data
+**Step 2: Prepare Fine-tuning Data**
 
 ```bash
 python finetunesetup.py
-
 ```
 
--   Converts Q&A to OpenAI format
--   Outputs `OpenAIFineTune/stoney_train.jsonl` & `stoney_valid.jsonl`
+-   Converts Q&A pairs to OpenAI messages format
+-   Applies 80/20 train/validation split
+-   Outputs `OpenAIFineTune/stoney_train.jsonl` & `OpenAIFineTune/stoney_valid.jsonl`
 
-### 3. Fine-tune Model
+**Step 3: Fine-tune Model**
 
 ```bash
 python openai_finetune.py
-
 ```
 
--   Publishes the fine-tuning dataset to Hugging Face Datasets when `HUGGINGFACE_*` variables are configured.
--   Uploads files to OpenAI and starts the fine-tuning job.
--   Streams status and metrics to Weights & Biases when `WANDB_*` variables are provided.
--   Implements checkpointing & logs.
+-   Publishes dataset to Hugging Face when `HUGGINGFACE_*` variables are configured
+-   Uploads files to OpenAI and starts fine-tuning job (default: GPT-4o-mini, 3 epochs)
+-   Streams status and metrics to Weights & Biases when `WANDB_*` variables are provided
+-   Monitors job progress and logs trained tokens, accuracy, validation loss
+-   Returns fine-tuned model ID upon completion
+
+### Option B: Grammar→RL Pipeline (October 2025)
+
+**Run Complete Grammar Extraction Pipeline**
+
+```bash
+python run_stoney_grammar_pipeline.py
+```
+
+This executes the full 4-stage process:
+
+1. **PDF Ingestion**: Renders `Stoney; A Grammar of the Stony Language.pdf` to PNG images
+   - Output: `data/grammar_pages/*.png`
+
+2. **Rule Extraction**: Uses OpenAI vision models to extract structured grammar rules
+   - Output: `data/grammar_extracted_stoney/*.json`
+   - Each extraction includes rule text, category, confidence score, page provenance
+
+3. **Rule Organization**: Filters, deduplicates, and curates high-confidence rules
+   - Output: `data/rl_training_rules_stoney.json`
+   - Categories: morphology, syntax, phonology, translation, semantics, phonotactics
+
+4. **Task Generation**: Converts rules into 3-6 RL training tasks per rule
+   - Output: `data/training_datasets_stoney.jsonl`
+   - Includes prompts, expected answers, hints, verification patterns, difficulty levels
+
+**Install Custom RL Environment**
+
+```bash
+pip install -e environments/stoney_nakoda_translation
+```
+
+The environment provides:
+- Multi-signal reward functions (exact match, character F1, pattern matching)
+- Integration with GRPO and `verifiers` framework
+- Support for qualitative, non-coding language tasks
+
+**Run RL Training** (with your RL framework, e.g., Prime-RL)
+
+```bash
+# Use the generated data/training_datasets_stoney.jsonl with your GRPO trainer
+# The custom environment exposes reward functions for linguistic accuracy
+```
+
+### Option C: Combined Approach (Recommended for Best Results)
+
+1. **Run Dictionary Pipeline first** → Establishes base translation capability
+2. **Deploy initial model** → Get community feedback
+3. **Run Grammar Pipeline** → Add grammatical precision and cultural nuance
+4. **Iterate with Community-In-The-Loop** → Refine using LoRA on correction triplets
 
 ----------
 
@@ -848,18 +1042,21 @@ Here is the actual LLM output using this simple idea: [RLHFrules.json](RLHFrules
 
 ### Stoney Grammar RL Pipeline (October 2025 Refresh)
 
-The borrowed RL Grammar Gym workflow now lives in this repo with Stoney-specific code and assets. The dictionary-to-fine-tune path is untouched; this pipeline is an additional branch that starts from the grammar PDF (`Stoney; A Grammar of the Stony Language.pdf`) and produces reinforcement-learning tasks.
+The RL Grammar Gym workflow now lives in this repo with Stoney-specific code and assets. The dictionary-to-fine-tune path is untouched; this pipeline is an additional branch that starts from the grammar PDF (`Stoney; A Grammar of the Stony Language.pdf`) and produces reinforcement-learning tasks.
 
-#### Three automated stages (all Stoney-aware)
+#### Four automated stages (all Stoney-aware)
 
-1. **Vision/Linguistic extraction**  
-   `stoney_rl_grammar/pdf_ingest.py` renders each PDF page to an image, and `stoney_rl_grammar/rule_extractor.py` sends that page image to the OpenAI Responses API (default `gpt-5`, set in `.env`) to pull structured grammar rules straight from the scans.
+1. **PDF Ingestion**
+   `stoney_rl_grammar/pdf_ingest.py` renders each PDF page to a PNG image using PyMuPDF.
 
-2. **Rule organisation**  
+2. **Vision/Linguistic extraction**
+   `stoney_rl_grammar/rule_extractor.py` sends page images to the OpenAI Responses API (configurable via `STONEY_EXTRACTION_MODEL` or `OPENAI_RESPONSES_MODEL` in `.env`) to pull structured grammar rules straight from the scans.
+
+3. **Rule organisation**
    `stoney_rl_grammar/rule_organizer.py` filters low-confidence or duplicate rules and builds a compact catalogue the RL tooling can consume.
 
-3. **RL task generation**  
-   `stoney_rl_grammar/task_generator.py` turns each curated rule into 3-6 morphology, translation, or pattern-identification tasks for the forthcoming verifier environments.
+4. **RL task generation**
+   `stoney_rl_grammar/task_generator.py` turns each curated rule into 3-6 morphology, translation, or pattern-identification tasks for the verifier environments.
 
 Run all stages end-to-end:
 
@@ -883,56 +1080,6 @@ Environment configuration comes from `.env`:
 
 > The legacy dictionary extraction/fine-tuning scripts remain unchanged, so you can keep running those while iterating on the grammar RL pipeline in parallel.
 
-## October 2025 Grammar Gym Expansion
-
-The Stoney Nakoda grammar gym now operates as a fully automated, closed-loop RL system that is purpose-built for qualitative, non-coding language tasks. This expansion aligns the extraction code, the verifier environment, and the curriculum so that every training signal traces back to documented grammar and community-approved usage.
-
-### Closed-Loop Pipeline Overview
-
-1. **Extract** â€“ `stoney_rl_grammar/pdf_ingest.py` and `stoney_rl_grammar/rule_extractor.py` convert each scanned page into structured rules with page provenance and confidence scores.  
-2. **Curate** â€“ `stoney_rl_grammar/rule_organizer.py` filters noise, deduplicates titles, and writes `data/rl_training_rules_stoney.json` with category counts for audit.  
-3. **Fabricate Tasks** â€“ `stoney_rl_grammar/task_generator.py` transforms every curated rule into 3-6 task prompts, capturing hints, regex verification, and difficulty labels.  
-4. **Package Rewards** â€“ `environments/stoney_nakoda_translation/stoney_nakoda_translation/environment.py` exposes exact-match, character-F1, and pattern rewards that reference the same rule metadata.  
-5. **Train & Evaluate** â€“ `prime-rl` runners load the packaged environment, while `bilingual_qa_generator.py` and `convert_data_format.py` keep supervised corpora aligned with the RL tasks.
-
-Every artefact is written to `data/` so linguists can review examples and optionally edit JSON before training begins.
-
-### Grammar Rule Construction and Traceability
-
-- Each `GrammarRule` object carries `rule_id`, source page, and chunk identifiers, allowing rule-level spot checks and regression tracking.  
-- Verification hints capture affix boundaries, allowable morpheme shapes, or mandatory particles. These hints route into regex and checklist rewards so that the gym can grade morphology, not just surface translation.  
-- Rule categories (morphology, syntax, phonology, translation, semantics, phonotactics) power curriculum filters. You can, for example, isolate phonology rules when debugging nasal consonant preservation.
-
-### Multi-Signal Reward Stack
-
-- **Exact Match** guards against hallucinated answers when the rule expects fixed forms (e.g., imperative particles).  
-- **Character F1** measures preservation of Dakota-derived orthography (Å¡, Å‹, Ä‡) as well as doubled vowels.  
-- **Pattern Reward** checks regex constraints and falls back to hint coverage, scoring partial compliance for multi-step tasks.  
-- Because the environment keeps rewards independent, you can weight or ablate them when experimenting with new models or curriculum schedules.
-
-### Qualitative RL for Cultural Competence
-
-Training on qualitative, non-coding prompts is now a first-class feature:
-
-- Task generator prompts request scenario-based instructions, storytelling completions, and grammatical explanations alongside raw translations.  
-- Hints encode cultural notes supplied by community reviewers, allowing the gym to reward answers that incorporate respectful phrasing or kinship markers.  
-- This design lets GRPO optimize for linguistic accuracy *and* cultural nuance without hard-coding rubric logic in Python.  
-- Synthetic QA pairs produced by `bilingual_qa_generator.py` mirror these qualitative formats so supervised fine-tuning and RL training reinforce one another.
-
-### Operational Checklist
-
-1. Set `.env` keys (`OPENAI_API_KEY`, `GOOGLE_API_KEY`, optional model overrides).  
-2. Run `python run_stoney_grammar_pipeline.py` to refresh rule, task, and dataset outputs.  
-3. Inspect `data/rl_training_rules_stoney.json` and `data/training_datasets_stoney.jsonl` for spot checks.  
-4. Install the environment package: `pip install -e environments/stoney_nakoda_translation`.  
-5. Launch GRPO training with PrimeIntellect or your preferred RL harness, pointing to the generated dataset.  
-6. After training, evaluate qualitative prompts (stories, explanations, cultural etiquette) to validate that non-coding tasks improve.
-
-### Research Outlook
-
-- **Curriculum Scheduling** â€“ upcoming experiments will weight reward components differently per difficulty tier, emphasizing morphology early and semantic nuance later.  
-- **Community Review Loops** â€“ JSON artefacts will gain review status flags so native speakers can approve or veto tasks before they land in production runs.  
-- **Cross-Language Transfer** â€“ the same pipeline can ingest Dakota or Lakota scans with minimal configuration changes, enabling comparative Siouan grammar gyms.
 ## October 2025 Grammar Gym Expansion
 
 The Stoney Nakoda grammar gym now operates as a fully automated, closed-loop RL system that is purpose-built for qualitative, non-coding language tasks. This expansion aligns the extraction code, the verifier environment, and the curriculum so that every training signal traces back to documented grammar and community-approved usage.
@@ -983,3 +1130,4 @@ Training on qualitative, non-coding prompts is now a first-class feature:
 - **Curriculum Scheduling** - upcoming experiments will weight reward components differently per difficulty tier, emphasizing morphology early and semantic nuance later.
 - **Community Review Loops** - JSON artifacts will gain review status flags so native speakers can approve or veto tasks before they land in production runs.
 - **Cross-Language Transfer** - the same pipeline can ingest Dakota or Lakota scans with minimal configuration changes, enabling comparative Siouan grammar gyms.
+
