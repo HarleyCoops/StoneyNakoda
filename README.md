@@ -328,16 +328,42 @@ graph TD
 ## Detailed Project Structure
 
 ```
-PUBLICRELEASE/
-Î“Ã¶Â£Î“Ã¶Ã‡Î“Ã¶Ã‡ OpenAIFineTune/           # OpenAI fine-tuning files
-Î“Ã¶Ã©   Î“Ã¶Â£Î“Ã¶Ã‡Î“Ã¶Ã‡ stoney_train.jsonl    # Training dataset
-Î“Ã¶Ã©   Î“Ã¶Ã¶Î“Ã¶Ã‡Î“Ã¶Ã‡ stoney_valid.jsonl    # Validation dataset
-Î“Ã¶Â£Î“Ã¶Ã‡Î“Ã¶Ã‡ checkpoints/              # Model checkpoints
-Î“Ã¶Â£Î“Ã¶Ã‡Î“Ã¶Ã‡ .env.example             # Env variables example
-Î“Ã¶Â£Î“Ã¶Ã‡Î“Ã¶Ã‡ requirements.txt         # Python dependencies
-Î“Ã¶Â£Î“Ã¶Ã‡Î“Ã¶Ã‡ english_dictionary.jsonl
-Î“Ã¶Â£Î“Ã¶Ã‡Î“Ã¶Ã‡ stoney_dictionary.jsonl
-Î“Ã¶Ã¶Î“Ã¶Ã‡Î“Ã¶Ã‡ bilingual_training_set.jsonl
+StoneyNakoda/
+├── Dictionaries/                          # Source dictionary files
+│   ├── english_dictionary.jsonl           # English→Stoney mappings
+│   ├── stoney_dictionary.jsonl            # Stoney→English mappings
+│   └── bilingual_training_set.jsonl       # Generated Q&A pairs
+├── OpenAIFineTune/                        # Training files for OpenAI
+│   ├── stoney_train.jsonl                 # 80% training split
+│   └── stoney_valid.jsonl                 # 20% validation split
+├── data/                                  # RL pipeline outputs
+│   ├── grammar_pages/                     # Rendered PDF pages (PNG)
+│   ├── grammar_extracted_stoney/          # Raw rule extractions (JSON)
+│   ├── rl_training_rules_stoney.json      # Curated grammar rules
+│   └── training_datasets_stoney.jsonl     # RL training tasks
+├── environments/                          # Custom RL environments
+│   └── stoney_nakoda_translation/         # Stoney RL environment package
+├── stoney_rl_grammar/                     # Grammar RL pipeline module
+│   ├── pipeline.py                        # High-level orchestration
+│   ├── pdf_ingest.py                      # PDF→image conversion
+│   ├── rule_extractor.py                  # Vision-based rule extraction
+│   ├── rule_organizer.py                  # Rule curation and filtering
+│   ├── task_generator.py                  # RL task generation
+│   ├── config.py                          # Configuration and paths
+│   └── models.py                          # Data models (GrammarRule, etc.)
+├── Public/                                # Images and documentation assets
+├── bilingual_qa_generator.py              # Q&A generation via Gemini
+├── finetunesetup.py                       # Data formatting and splitting
+├── openai_finetune.py                     # OpenAI fine-tuning + HF + W&B
+├── convert_data_format.py                 # Legacy format converter
+├── run_stoney_grammar_pipeline.py         # CLI entry for grammar RL pipeline
+├── requirements.txt                       # Python dependencies
+├── .env.example                           # API key template
+├── RLHFrules.json                         # Language pattern rules for RL
+├── Stoney; A Grammar of the Stony Language.pdf  # Source grammar PDF
+├── CLAUDE.md                              # Developer guide for Claude Code
+├── PIPELINE_GUIDE.md                      # Complete execution guide
+└── README.md                              # Full project documentation
 ```
 
 ---
