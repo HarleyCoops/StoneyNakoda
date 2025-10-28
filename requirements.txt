@@ -1,28 +1,4 @@
-# Core dependencies
-python-dotenv>=1.0.0  # For loading environment variables
-tqdm>=4.65.0         # For progress bars
-
-# OpenAI dependencies
-openai>=1.40.0       # Responses API + fine-tuning support
-
-# Google AI dependencies
-google-generativeai>=0.3.0  # For Gemini model
-google-cloud-storage>=2.10.0  # For Google Cloud storage
-
-# Data processing
-tensorflow>=2.13.0    # Core ML framework
-torch>=2.0.0         # PyTorch for some model operations
-transformers>=4.30.0  # Hugging Face transformers
-datasets>=2.20.0     # Hugging Face dataset utilities
-
-# Utility packages
-numpy>=1.24.0        # Numerical operations
-pandas>=2.0.0        # Data manipulation
-requests>=2.31.0     # HTTP requests
-beautifulsoup4>=4.12.0  # Web scraping
-pypdf>=4.2.0         # PDF parsing for grammar extraction
-pymupdf>=1.24.0      # Render PDF pages to images
-tenacity>=8.2.0      # Resilient retries for API calls
-huggingface_hub>=0.24.0  # Publishing datasets/models to Hugging Face
-wandb>=0.17.0        # Experiment tracking and reporting
-verifiers>=0.1.5.dev1  # Prime Intellect environment scaffolding
+python-dotenv>=1.0.0
+openai>=1.40.0
+pymupdf>=1.24.0
+tenacity>=8.2.0
