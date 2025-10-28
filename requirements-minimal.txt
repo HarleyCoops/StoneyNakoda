@@ -1,0 +1,41 @@
+# Minimal requirements for initial pipeline testing
+# Run: pip install -r requirements-minimal.txt
+
+# Core dependencies
+python-dotenv>=1.0.0  # For loading environment variables
+tqdm>=4.65.0         # For progress bars
+
+# OpenAI dependencies
+openai>=1.40.0       # Responses API + fine-tuning support
+
+# Google AI dependencies
+google-generativeai>=0.3.0  # For Gemini model
+
+# Data processing (lightweight)
+datasets>=2.20.0     # Hugging Face dataset utilities
+numpy>=1.24.0        # Numerical operations
+pandas>=2.0.0        # Data manipulation
+
+# PDF parsing for grammar extraction
+pypdf>=4.2.0         # PDF parsing
+pymupdf>=1.24.0      # Render PDF pages to images
+
+# Utility packages
+requests>=2.31.0     # HTTP requests
+beautifulsoup4>=4.12.0  # Web scraping
+tenacity>=8.2.0      # Resilient retries for API calls
+
+# Hugging Face integration
+huggingface_hub>=0.24.0  # Publishing datasets/models to Hugging Face
+
+# Prime Intellect RL environment
+verifiers>=0.1.5.dev1  # Prime Intellect environment scaffolding
+
+# Optional: Experiment tracking (commented out for speed)
+# wandb>=0.17.0
+
+# Not needed for initial testing (removed):
+# tensorflow>=2.13.0    # 620 MB - not needed
+# torch>=2.0.0          # 900 MB - not needed
+# transformers>=4.30.0  # Not needed for initial testing
+# google-cloud-storage>=2.10.0  # Not used in current scripts
