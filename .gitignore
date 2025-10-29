@@ -110,3 +110,15 @@ MANIFEST
 
 .codegpt
 nul
+
+# Project generated artifacts
+Dictionaries/bilingual_training_set*.jsonl
+Dictionaries/checkpoints*/
+OpenAIFineTune/*.jsonl
+data/grammar_pages/
+data/grammar_extracted_stoney/
+data/rl_training_rules_stoney.json
+data/training_datasets_stoney.jsonl
+
+# Weights & Biases runs
+wandb/
