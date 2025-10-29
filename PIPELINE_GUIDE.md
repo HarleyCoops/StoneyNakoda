@@ -71,8 +71,8 @@ cp .env.example .env
 # Step 1: Generate Q&A pairs from dictionaries
 # Duration: 2-4 hours depending on API speed
 # Cost: ~$5-15 (Google Gemini)
-python bilingual_qa_generator.py
-# Output: Dictionaries/bilingual_training_set.jsonl (150K Q&A pairs)
+python bilingual_qa_generator2.py
+# Output: Dictionaries/bilingual_training_set_v2.jsonl (10K Q&A pairs, 5K per language)
 
 # Step 2: Convert to OpenAI format
 # Duration: < 1 minute
@@ -129,7 +129,7 @@ pip install -e environments/stoney_nakoda_translation
 
 ```bash
 # All-in-one command
-python bilingual_qa_generator.py && \
+python bilingual_qa_generator2.py && \
 python finetunesetup.py && \
 python openai_finetune.py
 
@@ -158,7 +158,7 @@ pip install -e environments/stoney_nakoda_translation
 
 ```bash
 # Run dictionary pipeline first
-python bilingual_qa_generator.py
+python bilingual_qa_generator2.py
 python finetunesetup.py
 python openai_finetune.py
 
@@ -179,7 +179,7 @@ pip install -e environments/stoney_nakoda_translation
 
 | Stage | Script | Input | Output | Duration |
 |-------|--------|-------|--------|----------|
-| **Q&A Generation** | `bilingual_qa_generator.py` | `Dictionaries/english_dictionary.jsonl`<br>`Dictionaries/stoney_dictionary.jsonl` | `Dictionaries/bilingual_training_set.jsonl`<br>(150K Q&A pairs) | 2-4 hours |
+| **Q&A Generation** | `bilingual_qa_generator2.py` | `Dictionaries/english_dictionary.jsonl`<br>`Dictionaries/stoney_dictionary.jsonl` | `Dictionaries/bilingual_training_set_v2.jsonl`<br>(10K Q&A pairs) | 2-4 hours |
 | **Data Preparation** | `finetunesetup.py` | `bilingual_training_set.jsonl` | `OpenAIFineTune/stoney_train.jsonl`<br>`OpenAIFineTune/stoney_valid.jsonl` | < 1 min |
 | **Fine-tuning** | `openai_finetune.py` | Training JSONL files | Fine-tuned model ID | 1-3 hours |
 
@@ -198,9 +198,9 @@ pip install -e environments/stoney_nakoda_translation
 
 ### Dictionary Pipeline
 
-**bilingual_qa_generator.py:**
+**bilingual_qa_generator2.py:**
 - Watch `tqdm` progress bars in console
-- Check `Dictionaries/checkpoints/checkpoint_*.jsonl` for recovery points
+- Check `Dictionaries/checkpoints_v2/checkpoint_*.jsonl` for recovery points
 - Each checkpoint saves every 1000 Q&A pairs
 
 **openai_finetune.py:**
@@ -269,10 +269,10 @@ StoneyNakoda/
 
 **Symptom:** Script crashes or stops generating
 **Solutions:**
-- Check `Dictionaries/checkpoints/` for last successful checkpoint
+- Check `Dictionaries/checkpoints_v2/` for last successful checkpoint
 - Verify `GOOGLE_API_KEY` is valid
 - Check Gemini API quota/rate limits
-- Reduce batch size in `bilingual_qa_generator.py` (line 80, default 5)
+- Reduce context_size in `bilingual_qa_generator2.py` (line 124, default 6)
 
 ### Fine-tuning Validation Errors
 
@@ -367,7 +367,7 @@ WANDB_RUN_NAME=stoney-finetune-001         # Custom run name
 **To run the full Stoney pipeline:**
 
 1. Install dependencies and configure `.env` with API keys
-2. Run dictionary pipeline: `bilingual_qa_generator.py` → `finetunesetup.py` → `openai_finetune.py`
+2. Run dictionary pipeline: `bilingual_qa_generator2.py` → `finetunesetup.py` → `openai_finetune.py`
 3. Run grammar pipeline: `run_stoney_grammar_pipeline.py`
 4. Install RL environment: `pip install -e environments/stoney_nakoda_translation`
 5. Deploy, collect feedback, and iterate with LoRA

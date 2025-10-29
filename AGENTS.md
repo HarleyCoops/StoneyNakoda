@@ -109,12 +109,12 @@ When documenting pipeline failures:
 Example failure documentation:
 ```
 Stage: Q&A Generation
-Command: python bilingual_qa_generator.py
+Command: python bilingual_qa_generator2.py
 Timestamp: 2025-10-28 17:30:00 UTC
 Error: google.api_core.exceptions.ResourceExhausted: 429 Quota exceeded
 Output size: 45,234 lines generated before failure
-Checkpoint: Dictionaries/checkpoints/checkpoint_45.jsonl exists
-Mitigation: Reduced batch size from 5 to 3, resumed from checkpoint
+Checkpoint: Dictionaries/checkpoints_v2/checkpoint_45.jsonl exists
+Mitigation: Reduced context_size from 6 to 4, resumed from checkpoint
 ```
 
 ---
@@ -149,12 +149,12 @@ python -c "import openai, google.generativeai; print('Dependencies OK')"
 #### Stage 1: Q&A Generation (2-4 hours, $5-15)
 
 ```bash
-python bilingual_qa_generator.py
+python bilingual_qa_generator2.py
 ```
 
 **Expected Output:**
-- `Dictionaries/bilingual_training_set.jsonl` (150K Q&A pairs)
-- `Dictionaries/checkpoints/checkpoint_*.jsonl` (progress checkpoints every 1000 pairs)
+- `Dictionaries/bilingual_training_set_v2.jsonl` (10K Q&A pairs, 5K per language)
+- `Dictionaries/checkpoints_v2/checkpoint_*.jsonl` (progress checkpoints every 1000 pairs)
 
 **Failure Checkpoints:**
 - After 1000 pairs: Verify checkpoint file exists and contains valid JSON
@@ -318,7 +318,7 @@ Use this template when documenting pipeline failures:
 1. `.env.example` - Document new model options
 2. `stoney_rl_grammar/config.py` - Update default model constants
 3. `openai_finetune.py` - Update fine-tune model fallback
-4. `bilingual_qa_generator.py` - Update Gemini model reference
+4. `bilingual_qa_generator2.py` - Update Gemini model reference
 
 ### Retry/Backoff Policies
 
@@ -337,10 +337,10 @@ Use this template when documenting pipeline failures:
 - Same policy as extraction
 - Separate retry counter per task batch
 
-**Q&A Generation** (`bilingual_qa_generator.py`):
+**Q&A Generation** (`bilingual_qa_generator2.py`):
 - No explicit retry decorator (relies on Gemini client defaults)
 - Manual checkpoint system: resumes from last successful checkpoint
-- Checkpoints saved every 1000 pairs in `Dictionaries/checkpoints/`
+- Checkpoints saved every 1000 pairs in `Dictionaries/checkpoints_v2/`
 
 ### Cost Estimation Formula
 
@@ -522,7 +522,7 @@ Before submitting changes:
 
 | Script | Purpose | Duration | Cost |
 |--------|---------|----------|------|
-| `bilingual_qa_generator.py` | Generate Q&A pairs from dictionaries | 2-4 hours | $5-15 |
+| `bilingual_qa_generator2.py` | Generate Q&A pairs from dictionaries (enriched prompts) | 2-4 hours | $5-15 |
 | `finetunesetup.py` | Convert to OpenAI format | < 1 min | Free |
 | `openai_finetune.py` | Fine-tune OpenAI model | 1-3 hours | $20-50 |
 | `run_stoney_grammar_pipeline.py` | Extract grammar rules + generate tasks | 10-30 min | $10-30 |

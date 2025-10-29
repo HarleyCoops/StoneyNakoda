@@ -186,9 +186,6 @@ class BilingualQAGeneratorV2:
                         )
 
                         response = self.model.generate_content(prompt)
-                        if self._is_blocked(response):
-                            entries_buffer = []
-                            continue
                         if not response or not response.candidates:
                             logger.warning("No response from model, skipping batch")
                             entries_buffer = []
