@@ -1,0 +1,24 @@
+# Bak-Sneppen 3D Visualization Requirements
+# ==========================================
+
+# Core animation engine
+manim>=0.18.0
+
+# Scientific computing
+numpy>=1.24.0
+
+# Optional: For data export and analysis
+pandas>=2.0.0
+matplotlib>=3.7.0
+
+# Optional: For advanced statistical analysis
+scipy>=1.10.0
+
+# Optional: For interactive controls (experimental)
+ipywidgets>=8.0.0
+
+# Development dependencies (optional)
+pytest>=7.3.0
+black>=23.0.0
+flake8>=6.0.0
+
