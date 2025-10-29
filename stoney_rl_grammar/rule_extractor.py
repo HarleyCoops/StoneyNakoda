@@ -81,22 +81,22 @@ class StoneyGrammarExtractor:
         if chunk.text:
             content.append({"type": "text", "text": chunk.text})
         if chunk.image_b64:
-            content.append({"type": "input_image", "image_base64": chunk.image_b64})
+            # Ensure base64 string has proper data URL format
+            image_data = chunk.image_b64
+            if not image_data.startswith("data:"):
+                image_data = f"data:image/png;base64,{image_data}"
+            content.append({
+                "type": "image_url",
+                "image_url": {"url": image_data}
+            })
 
-        response = self.client.responses.create(
+        response = self.client.chat.completions.create(
             model=self.model,
-            temperature=self.temperature,
-            max_output_tokens=self.max_output_tokens,
-            response_format={"type": "json_object"},
-            input=[
+            max_completion_tokens=self.max_output_tokens,
+            messages=[
                 {
                     "role": "system",
-                    "content": [
-                        {
-                            "type": "text",
-                            "text": "You extract Stoney Nakoda grammar rules from scholarly text.",
-                        }
-                    ],
+                    "content": "You extract Stoney Nakoda grammar rules from scholarly text.",
                 },
                 {
                     "role": "user",
@@ -104,8 +104,10 @@ class StoneyGrammarExtractor:
                 },
             ],
         )
-        content = response.output[0].content[0].text  # type: ignore[index]
-        return json.loads(content)
+        content_text = response.choices[0].message.content
+        if not isinstance(content_text, str):
+            raise ValueError(f"Expected string response, got {type(content_text)}")
+        return json.loads(content_text)
 
     def extract_rules(self, chunks: Sequence[PageChunk]) -> List[GrammarRule]:
         extracted_rules: List[GrammarRule] = []

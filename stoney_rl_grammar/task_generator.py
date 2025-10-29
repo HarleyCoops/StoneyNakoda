@@ -80,29 +80,25 @@ class StoneyTaskGenerator:
 
     @retry(wait=wait_exponential(multiplier=1, min=2, max=20), stop=stop_after_attempt(3))
     def _call_model(self, prompt: str) -> Dict:
-        response = self.client.responses.create(
+        response = self.client.chat.completions.create(
             model=self.model,
-            temperature=self.temperature,
-            max_output_tokens=self.max_output_tokens,
+            max_completion_tokens=self.max_output_tokens,
             response_format={"type": "json_object"},
-            input=[
+            messages=[
                 {
                     "role": "system",
-                    "content": [
-                        {
-                            "type": "text",
-                            "text": "You design short RL tasks that evaluate specific Stoney Nakoda grammar rules.",
-                        }
-                    ],
+                    "content": "You design short RL tasks that evaluate specific Stoney Nakoda grammar rules.",
                 },
                 {
                     "role": "user",
-                    "content": [{"type": "text", "text": prompt}],
+                    "content": prompt,
                 },
             ],
         )
-        content = response.output[0].content[0].text  # type: ignore[index]
-        return json.loads(content)
+        content_text = response.choices[0].message.content
+        if not isinstance(content_text, str):
+            raise ValueError(f"Expected string response, got {type(content_text)}")
+        return json.loads(content_text)
 
     def generate_tasks(self, rules: Sequence[GrammarRule]) -> List[RLTrainingTask]:
         """Generate and persist RL tasks for each grammar rule."""
