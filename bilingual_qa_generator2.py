@@ -9,6 +9,7 @@ question / answer pairs while keeping the JSON structure identical
 import json
 import logging
 import os
+import re
 import time
 from datetime import datetime
 from pathlib import Path
@@ -37,7 +38,11 @@ class BilingualQAGeneratorV2:
             raise ValueError("GOOGLE_API_KEY not found in environment variables")
 
         genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel("gemini-2.5-pro")
+        self.model_name = os.getenv("GEMINI_MODEL", "gemini-2.5-pro")
+        self.model = genai.GenerativeModel(
+            self.model_name,
+            generation_config={"response_mime_type": "application/json"},
+        )
         self.english_dict_file = Path(english_dict_file)
         self.stoney_dict_file = Path(stoney_dict_file)
 
@@ -181,14 +186,17 @@ class BilingualQAGeneratorV2:
                         )
 
                         response = self.model.generate_content(prompt)
+                        if self._is_blocked(response):
+                            entries_buffer = []
+                            continue
                         if not response or not response.candidates:
                             logger.warning("No response from model, skipping batch")
                             entries_buffer = []
                             continue
 
-                        text = response.candidates[0].content.parts[0].text
+                        text = self._collect_response_text(response)
                         try:
-                            qa_list = json.loads(text)
+                            qa_list = self._parse_qa_list(text)
                             for qa in qa_list:
                                 yield {
                                     "question": qa["question"],
@@ -197,8 +205,8 @@ class BilingualQAGeneratorV2:
                                     if is_english
                                     else "stoney",
                                 }
-                        except (json.JSONDecodeError, KeyError, TypeError):
-                            logger.warning("Invalid JSON payload returned, skipping batch")
+                        except ValueError as err:
+                            self._log_invalid_payload(err, text)
 
                         entries_buffer = []
 
@@ -279,6 +287,85 @@ class BilingualQAGeneratorV2:
                 )
                 + "\n"
             )
+
+
+    def _collect_response_text(self, response) -> str:
+        """Concatenates text parts from a Gemini response into a single string."""
+        text_chunks: List[str] = []
+        for candidate in getattr(response, "candidates", []) or []:
+            content = getattr(candidate, "content", None)
+            if not content:
+                continue
+            for part in getattr(content, "parts", []) or []:
+                part_text = getattr(part, "text", None)
+                if part_text:
+                    text_chunks.append(part_text)
+        return "\n".join(text_chunks).strip()
+
+
+    def _is_blocked(self, response) -> bool:
+        """Logs block reasons and signals whether Gemini returned an empty payload."""
+        feedback = getattr(response, "prompt_feedback", None)
+        block_reason = getattr(feedback, "block_reason", None)
+        if block_reason:
+            logger.warning("Gemini blocked the prompt: %s", block_reason)
+            return True
+
+        for candidate in getattr(response, "candidates", []) or []:
+            finish_reason = getattr(candidate, "finish_reason", None)
+            if finish_reason and finish_reason != "STOP":
+                logger.warning("Gemini finished with reason %s", finish_reason)
+        return False
+
+
+    def _parse_qa_list(self, raw_text: str) -> List[Dict[str, str]]:
+        """Parses and validates the JSON array of QA objects returned by Gemini."""
+        cleaned = raw_text.strip()
+        if not cleaned:
+            raise ValueError("response text was empty")
+
+        if cleaned.startswith("```"):
+            cleaned = re.sub(r"^```(?:json)?\s*", "", cleaned)
+            cleaned = re.sub(r"\s*```$", "", cleaned)
+
+        match = re.search(r"\[[\s\S]*\]", cleaned)
+        if not match:
+            raise ValueError("no JSON array found in response")
+
+        try:
+            qa_list = json.loads(match.group())
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"unable to decode JSON: {exc}") from exc
+
+        if not isinstance(qa_list, list):
+            raise ValueError("decoded payload was not a list")
+
+        normalised: List[Dict[str, str]] = []
+        for index, item in enumerate(qa_list):
+            if not isinstance(item, dict):
+                raise ValueError(f"item {index} was not an object")
+            question = item.get("question")
+            answer = item.get("answer")
+            if not isinstance(question, str) or not isinstance(answer, str):
+                raise ValueError(f"item {index} missing string question/answer fields")
+            normalised.append({"question": question.strip(), "answer": answer.strip()})
+
+        if len(normalised) != 5:
+            raise ValueError(f"expected 5 QA pairs, received {len(normalised)}")
+
+        return normalised
+
+
+    def _log_invalid_payload(self, err: Exception, raw_text: str) -> None:
+        """Records details about malformed model responses for downstream debugging."""
+        preview = raw_text.strip().replace("\n", " ")
+        if len(preview) > 400:
+            preview = preview[:400] + "..."
+        logger.warning(
+            "Invalid JSON payload returned, skipping batch: %s | preview=%s",
+            err,
+            preview or "<empty>",
+        )
 
 
 def main():
