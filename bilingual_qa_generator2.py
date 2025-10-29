@@ -38,7 +38,11 @@ class BilingualQAGeneratorV2:
             raise ValueError("GOOGLE_API_KEY not found in environment variables")
 
         genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel("gemini-2.5-pro")
+        self.model_name = os.getenv("GEMINI_MODEL", "gemini-2.5-pro")
+        self.model = genai.GenerativeModel(
+            self.model_name,
+            generation_config={"response_mime_type": "application/json"},
+        )
         self.english_dict_file = Path(english_dict_file)
         self.stoney_dict_file = Path(stoney_dict_file)
 
@@ -182,6 +186,9 @@ class BilingualQAGeneratorV2:
                         )
 
                         response = self.model.generate_content(prompt)
+                        if self._is_blocked(response):
+                            entries_buffer = []
+                            continue
                         if not response or not response.candidates:
                             logger.warning("No response from model, skipping batch")
                             entries_buffer = []
