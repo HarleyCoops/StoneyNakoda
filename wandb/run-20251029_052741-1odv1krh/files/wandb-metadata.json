@@ -1,0 +1,28 @@
+{
+  "os": "Windows-11-10.0.26100-SP0",
+  "python": "CPython 3.12.6",
+  "startedAt": "2025-10-29T11:27:41.892416Z",
+  "program": "C:\\Users\\chris\\StoneyNakoda\\openai_finetune.py",
+  "codePath": "openai_finetune.py",
+  "codePathLocal": "openai_finetune.py",
+  "git": {
+    "remote": "https://github.com/HarleyCoops/StoneyNakoda.git",
+    "commit": "08fdbcf851703bf75c66a3469132b32db6611284"
+  },
+  "email": "christian.cooper.us@gmail.com",
+  "root": "C:\\Users\\chris\\StoneyNakoda",
+  "host": "PC",
+  "executable": "C:\\Python312\\python.exe",
+  "cpu_count": 12,
+  "cpu_count_logical": 12,
+  "disk": {
+    "/": {
+      "total": "1004769636352",
+      "used": "914334023680"
+    }
+  },
+  "memory": {
+    "total": "16749838336"
+  },
+  "writerId": "9s870uzl8pvtrodfc5lqnsth282o7a72"
+}
