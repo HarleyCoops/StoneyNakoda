@@ -206,7 +206,9 @@ class BilingualQAGeneratorV2:
                                     else "stoney",
                                 }
                         except ValueError as err:
-                            self._log_invalid_payload(err, text)
+                            logger.warning(
+                                "Invalid JSON payload returned, skipping batch: %s", err
+                            )
 
                         entries_buffer = []
 
@@ -303,21 +305,6 @@ class BilingualQAGeneratorV2:
         return "\n".join(text_chunks).strip()
 
 
-    def _is_blocked(self, response) -> bool:
-        """Logs block reasons and signals whether Gemini returned an empty payload."""
-        feedback = getattr(response, "prompt_feedback", None)
-        block_reason = getattr(feedback, "block_reason", None)
-        if block_reason:
-            logger.warning("Gemini blocked the prompt: %s", block_reason)
-            return True
-
-        for candidate in getattr(response, "candidates", []) or []:
-            finish_reason = getattr(candidate, "finish_reason", None)
-            if finish_reason and finish_reason != "STOP":
-                logger.warning("Gemini finished with reason %s", finish_reason)
-        return False
-
-
     def _parse_qa_list(self, raw_text: str) -> List[Dict[str, str]]:
         """Parses and validates the JSON array of QA objects returned by Gemini."""
         cleaned = raw_text.strip()
@@ -354,18 +341,6 @@ class BilingualQAGeneratorV2:
             raise ValueError(f"expected 5 QA pairs, received {len(normalised)}")
 
         return normalised
-
-
-    def _log_invalid_payload(self, err: Exception, raw_text: str) -> None:
-        """Records details about malformed model responses for downstream debugging."""
-        preview = raw_text.strip().replace("\n", " ")
-        if len(preview) > 400:
-            preview = preview[:400] + "..."
-        logger.warning(
-            "Invalid JSON payload returned, skipping batch: %s | preview=%s",
-            err,
-            preview or "<empty>",
-        )
 
 
 def main():
