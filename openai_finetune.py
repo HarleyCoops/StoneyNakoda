@@ -62,7 +62,7 @@ class OpenAIFineTuner:
 
         logger.info(f"Found training file: {self.train_file}")
         logger.info(f"Found validation file: {self.valid_file}")
-        self.fine_tune_model = os.getenv("OPENAI_FINETUNE_MODEL", os.getenv("OPENAI_MODEL", "gpt-4o-mini"))
+        self.fine_tune_model = os.getenv("OPENAI_FINETUNE_MODEL", os.getenv("OPENAI_MODEL", "gpt-4.1-2025-04-14"))
         logger.info("Using fine-tune base model: %s", self.fine_tune_model)
 
         # Hugging Face dataset publishing

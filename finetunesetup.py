@@ -73,6 +73,6 @@ def prepare_fine_tuning_data(input_file: str, output_dir: str):
     logger.info("Data preparation complete.")
 
 if __name__ == "__main__":
-    input_qa_file = "Dictionaries/bilingual_training_set.jsonl"
+    input_qa_file = "Dictionaries/bilingual_training_set_v2.jsonl"
     output_directory = "OpenAIFineTune/"
     prepare_fine_tuning_data(input_qa_file, output_directory)
