@@ -38,7 +38,7 @@ class BilingualQAGeneratorV2:
             raise ValueError("GOOGLE_API_KEY not found in environment variables")
 
         genai.configure(api_key=api_key)
-        self.model_name = os.getenv("GEMINI_MODEL", "gemini-2.5-pro")
+        self.model_name = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
         self.model = genai.GenerativeModel(
             self.model_name,
             generation_config={"response_mime_type": "application/json"},
