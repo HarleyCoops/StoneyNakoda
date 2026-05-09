@@ -2,11 +2,22 @@
 
 A working model of the Stoney Nakoda language has been developed and is now available for community-in-the-loop testing in 2025:
 
-- **Model App**: [Stoney Language Model App](https://huggingface.co/spaces/HarleyCooper/StoneyApp)  
+- **Model App**: [Stoney Language Model App](https://huggingface.co/spaces/HarleyCooper/StoneyApp)
 - **Training Data**: [StoneyNakoda Training Dataset](https://huggingface.co/datasets/HarleyCooper/StoneyNakoda/blob/main/zSTONEY1_TRAINING_SET.jsonl)
 
+## Data Governance First
 
-Any First Nations community seeking to apply this approach to their own language is warmly invited to reach out. 
+Before running training, upload, publishing, or public-release workflows, read [DATA_GOVERNANCE.md](DATA_GOVERNANCE.md) and validate [SOURCE_MANIFEST.yml](SOURCE_MANIFEST.yml):
+
+```bash
+python scripts/validate_source_manifest.py
+python scripts/check_config.py
+```
+
+The code defaults uncertain sources to `unknown` and refuses training or upload workflows unless human/community review has explicitly approved the relevant manifest records. The repository can enforce gates and safe defaults; it does not certify cultural permission or speaker approval.
+
+
+Any First Nations community seeking to apply this approach to their own language is warmly invited to reach out.
 
 By following this code, you can build a model for any low-resource language. The starting dictionary size should be ~8,000 words.
 
@@ -145,7 +156,7 @@ cp .env.example .env
 # Edit .env and add:
 #   OPENAI_API_KEY=sk-...
 #   GOOGLE_API_KEY=...
-# Optional: HUGGINGFACE_TOKEN, WANDB_API_KEY for publishing/tracking
+# Optional: HUGGINGFACE_PUBLISH=true plus HUGGINGFACE_TOKEN for private publishing; WANDB_API_KEY for tracking
 ```
 
 ### Full Pipeline Execution
@@ -219,7 +230,7 @@ After running both pipelines, you'll have:
 ### Cost Estimates
 
 - **Google Gemini API**: ~$5-15 for 150K Q&A generation (depends on model)
-- **OpenAI Fine-tuning**: ~$20-50 for GPT-4o-mini with 3 epochs
+- **OpenAI Fine-tuning**: cost depends on the allowlisted `OPENAI_FINETUNE_MODEL`, dataset size, and epochs
 - **Grammar Extraction**: ~$10-30 for vision model PDF processing
 - **Total**: ~$35-95 for complete pipeline
 
@@ -268,7 +279,7 @@ Although this is not cosine similarity, you can see the relationships among word
 
 ## Project Architecture
 
-This code forms a complete **dual-pipeline system** for training and deploying Stoney models. Both pipelines are fully functional and designed to improve through Community-In-The-Loop feedback. Access the active model here:  
+This repository is prototype research code for a **dual-pipeline system** for training and evaluating Stoney models. Local tests cover the governance, configuration, publishing, and structured-output gates, but full paid pipeline runs still require API keys and human/community approval recorded in `SOURCE_MANIFEST.yml`. Access the active model here:
 [Stoney Language Model App](https://huggingface.co/spaces/HarleyCooper/StoneyApp)
 
 ### Dual Pipeline Architecture (October 2025)
@@ -278,7 +289,7 @@ The project now contains **two complementary training pathways**:
 **1. Dictionary→Fine-tuning Pipeline (Supervised Learning)**
 - Primary path for building conversational translation models
 - Uses dictionary data to generate diverse Q&A pairs via Google Gemini
-- Fine-tunes OpenAI models (GPT-4o-mini/GPT-4) for natural language fluency
+- Fine-tunes an allowlisted OpenAI supervised fine-tuning model for natural language fluency
 - **Best for**: Initial model deployment, general translation capability
 
 **2. Grammar→RL Pipeline (Reinforcement Learning)** **[October 2025 Addition]**
@@ -410,6 +421,8 @@ source venv/bin/activate  # Windows: venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
+# For local development and tests
+pip install -e ".[dev]"
 
 ```
 
@@ -419,13 +432,13 @@ pip install -r requirements.txt
 # Copy example environment file
 cp .env.example .env
 # Provide OPENAI_API_KEY and GOOGLE_API_KEY in .env
-# Add HUGGINGFACE_* keys to auto-publish datasets and WANDB_* keys for training telemetry (see notes below)
-# Optionally set OPENAI_RESPONSES_MODEL / STONEY_*_MODEL overrides if you want a different Responses API model
-# (see https://platform.openai.com/docs/guides/migrate-to-responses for the latest guidance)
+# Optional model overrides are purpose-specific:
+# OPENAI_CHAT_MODEL, OPENAI_FINETUNE_MODEL, OPENAI_EXTRACTION_MODEL, OPENAI_TASK_MODEL, GEMINI_QA_MODEL
+python scripts/check_config.py
 
 ```
 
--   Set `HUGGINGFACE_TOKEN`, `HUGGINGFACE_DATASET_REPO`, and (optionally) `HUGGINGFACE_DATASET_PRIVATE` to push the fine-tuning JSONL files to Hugging Face Datasets automatically.
+-   Hugging Face publishing is disabled by default. Set `HUGGINGFACE_PUBLISH=true`, `HUGGINGFACE_TOKEN`, and `HUGGINGFACE_DATASET_REPO` to enable private uploads. Public upload also requires `HUGGINGFACE_DATASET_PRIVATE=false` and `ALLOW_PUBLIC_DATASET_UPLOAD=true`, plus manifest approval for public release.
 -   Set `WANDB_API_KEY`, `WANDB_PROJECT`, and (optionally) `WANDB_ENTITY` / `WANDB_RUN_NAME` to stream OpenAI fine-tuning telemetry to Weights & Biases.
 
 ### Initialization
@@ -470,8 +483,8 @@ python finetunesetup.py
 python openai_finetune.py
 ```
 
--   Publishes dataset to Hugging Face when `HUGGINGFACE_*` variables are configured
--   Uploads files to OpenAI and starts fine-tuning job (default: GPT-4o-mini, 3 epochs)
+-   Publishes to Hugging Face only when `HUGGINGFACE_PUBLISH=true` and the manifest allows public release
+-   Uploads files to OpenAI and starts a fine-tuning job with `OPENAI_FINETUNE_MODEL` after allowlist validation
 -   Streams status and metrics to Weights & Biases when `WANDB_*` variables are provided
 -   Monitors job progress and logs trained tokens, accuracy, validation loss
 -   Returns fine-tuned model ID upon completion
@@ -532,14 +545,15 @@ The environment provides:
 
 ### OpenAI Models
 
--   Default: `gpt-4o-2024-08-06`
--   Alternative: `gpt-3.5-turbo`
--   `.env`: `OPENAI_MODEL`
+-   Chat/default utility model: `OPENAI_CHAT_MODEL`
+-   Fine-tuning model: `OPENAI_FINETUNE_MODEL`, validated by `stoney_config.py`
+-   Grammar extraction model: `OPENAI_EXTRACTION_MODEL`
+-   RL task generation model: `OPENAI_TASK_MODEL`
+-   `OPENAI_MODEL` is ignored by current code paths and is not a fine-tuning fallback.
 
 ### Google Gemini
 
--   Default: `gemini-2.0-exp`
--   `.env`: `GEMINI_MODEL`
+-   Q&A generation model: `GEMINI_QA_MODEL`
 
 ### Hyperparameters
 
@@ -1103,7 +1117,7 @@ The RL Grammar Gym workflow now lives in this repo with Stoney-specific code and
    `stoney_rl_grammar/pdf_ingest.py` renders each PDF page to a PNG image using PyMuPDF.
 
 2. **Vision/Linguistic extraction**
-   `stoney_rl_grammar/rule_extractor.py` sends page images to the OpenAI Responses API (configurable via `STONEY_EXTRACTION_MODEL` or `OPENAI_RESPONSES_MODEL` in `.env`) to pull structured grammar rules straight from the scans.
+   `stoney_rl_grammar/rule_extractor.py` sends page images through the shared structured-output wrapper in `stoney_rl_grammar/llm_json.py` (configurable via `OPENAI_EXTRACTION_MODEL` in `.env`) and validates each response against `schemas/grammar_rule.schema.json`.
 
 3. **Rule organisation**
    `stoney_rl_grammar/rule_organizer.py` filters low-confidence or duplicate rules and builds a compact catalogue the RL tooling can consume.
@@ -1128,8 +1142,8 @@ Outputs stay inside this project:
 Environment configuration comes from `.env`:
 
 - Set `OPENAI_API_KEY` before running.  
-- Override `OPENAI_RESPONSES_MODEL`, `STONEY_EXTRACTION_MODEL`, or `STONEY_TASK_MODEL` if you want a specific Responses API model (e.g. `gpt-4.1` for heavier vision reasoning).  
-- See https://platform.openai.com/docs/guides/migrate-to-responses for current API behaviour.
+- Override `OPENAI_EXTRACTION_MODEL` or `OPENAI_TASK_MODEL` if you want a specific model for grammar extraction or task generation.
+- Structured JSON Schema output is used by default; strict JSON fallback requires `STONEY_ALLOW_JSON_FALLBACK=true`.
 
 > The legacy dictionary extraction/fine-tuning scripts remain unchanged, so you can keep running those while iterating on the grammar RL pipeline in parallel.
 

@@ -1,0 +1,212 @@
+schema_version: "1.0"
+records:
+  - source_id: dictionaries_stoney_raw
+    path_glob: "Dictionaries/stoney_dictionary.jsonl"
+    data_type: bilingual_dictionary
+    origin: unknown
+    rights_holder: unknown
+    permission_status: unknown
+    license: unknown
+    allowed_uses: []
+    prohibited_uses:
+      - training
+      - upload
+      - public_release
+    contains_sensitive_content: true
+    review_contact: "TBD - community/source governance review required"
+    notes: "Raw Stoney dictionary source. Approval is not asserted by repository presence."
+  - source_id: dictionaries_english_raw
+    path_glob: "Dictionaries/english_dictionary.jsonl"
+    data_type: bilingual_dictionary
+    origin: unknown
+    rights_holder: unknown
+    permission_status: unknown
+    license: unknown
+    allowed_uses: []
+    prohibited_uses:
+      - training
+      - upload
+      - public_release
+    contains_sensitive_content: true
+    review_contact: "TBD - community/source governance review required"
+    notes: "Raw English-indexed dictionary source. Approval is not asserted by repository presence."
+  - source_id: generated_dictionary_qa
+    path_glob: "Dictionaries/*bilingual_training_set*.jsonl"
+    data_type: generated_qa
+    origin: generated_from_dictionary_pipeline
+    rights_holder: unknown
+    permission_status: unknown
+    license: unknown
+    allowed_uses: []
+    prohibited_uses:
+      - training
+      - upload
+      - public_release
+    contains_sensitive_content: true
+    review_contact: "TBD - community/source governance review required"
+    notes: "Synthetic Q&A generated from dictionary sources. Must inherit source restrictions until reviewed."
+  - source_id: dictionary_generation_checkpoints
+    path_glob: "Dictionaries/checkpoints*/*"
+    data_type: generated_checkpoint
+    origin: generated_from_dictionary_pipeline
+    rights_holder: unknown
+    permission_status: unknown
+    license: unknown
+    allowed_uses: []
+    prohibited_uses:
+      - training
+      - upload
+      - public_release
+    contains_sensitive_content: true
+    review_contact: "TBD - community/source governance review required"
+    notes: "Intermediate Q&A generation checkpoints. Treat as generated data, not approved training data."
+  - source_id: openai_finetune_jsonl
+    path_glob: "OpenAIFineTune/*.jsonl"
+    data_type: fine_tuning_dataset
+    origin: generated_from_dictionary_pipeline
+    rights_holder: unknown
+    permission_status: unknown
+    license: unknown
+    allowed_uses: []
+    prohibited_uses:
+      - training
+      - upload
+      - public_release
+    contains_sensitive_content: true
+    review_contact: "TBD - community/source governance review required"
+    notes: "OpenAI fine-tuning JSONL outputs. Must be reviewed before training or upload."
+  - source_id: grammar_pdf
+    path_glob: "Stoney; A Grammar of the Stony Language.pdf"
+    data_type: grammar_pdf
+    origin: unknown
+    rights_holder: unknown
+    permission_status: unknown
+    license: unknown
+    allowed_uses: []
+    prohibited_uses:
+      - training
+      - upload
+      - public_release
+    contains_sensitive_content: true
+    review_contact: "TBD - community/source governance review required"
+    notes: "Grammar PDF source. Rights and approved uses must be documented before model workflows use derivatives."
+  - source_id: grammar_rendered_pages
+    path_glob: "data/grammar_pages/*"
+    data_type: generated_image_pages
+    origin: generated_from_grammar_pdf
+    rights_holder: unknown
+    permission_status: unknown
+    license: unknown
+    allowed_uses: []
+    prohibited_uses:
+      - training
+      - upload
+      - public_release
+    contains_sensitive_content: true
+    review_contact: "TBD - community/source governance review required"
+    notes: "Rendered page images derived from the grammar PDF."
+  - source_id: grammar_raw_extractions
+    path_glob: "data/grammar_extracted_stoney/*"
+    data_type: generated_grammar_extraction
+    origin: generated_from_grammar_pipeline
+    rights_holder: unknown
+    permission_status: unknown
+    license: unknown
+    allowed_uses: []
+    prohibited_uses:
+      - training
+      - upload
+      - public_release
+    contains_sensitive_content: true
+    review_contact: "TBD - community/source governance review required"
+    notes: "Raw per-page grammar extraction outputs."
+  - source_id: curated_grammar_rules
+    path_glob: "data/rl_training_rules_stoney.json"
+    data_type: curated_grammar_rules
+    origin: generated_from_grammar_pipeline
+    rights_holder: unknown
+    permission_status: unknown
+    license: unknown
+    allowed_uses: []
+    prohibited_uses:
+      - training
+      - upload
+      - public_release
+    contains_sensitive_content: true
+    review_contact: "TBD - community/source governance review required"
+    notes: "Curated grammar rules for RL task generation. Current approval is unknown."
+  - source_id: rl_training_tasks
+    path_glob: "data/training_datasets_stoney.jsonl"
+    data_type: generated_rl_tasks
+    origin: generated_from_grammar_pipeline
+    rights_holder: unknown
+    permission_status: unknown
+    license: unknown
+    allowed_uses: []
+    prohibited_uses:
+      - training
+      - upload
+      - public_release
+    contains_sensitive_content: true
+    review_contact: "TBD - community/source governance review required"
+    notes: "Generated RL training tasks derived from grammar rules."
+  - source_id: legacy_rlhf_rules
+    path_glob: "RLHFrules.json"
+    data_type: legacy_rules
+    origin: unknown
+    rights_holder: unknown
+    permission_status: unknown
+    license: unknown
+    allowed_uses: []
+    prohibited_uses:
+      - training
+      - upload
+      - public_release
+    contains_sensitive_content: true
+    review_contact: "TBD - community/source governance review required"
+    notes: "Legacy RLHF rules file. Treat as unreviewed until provenance is documented."
+  - source_id: rl_environment_sample_tasks
+    path_glob: "environments/stoney_nakoda_translation/stoney_nakoda_translation/data/*.jsonl"
+    data_type: sample_rl_tasks
+    origin: unknown
+    rights_holder: unknown
+    permission_status: unknown
+    license: unknown
+    allowed_uses: []
+    prohibited_uses:
+      - training
+      - upload
+      - public_release
+    contains_sensitive_content: true
+    review_contact: "TBD - community/source governance review required"
+    notes: "Sample environment tasks. Fixtures are not approval for training use."
+  - source_id: public_assets
+    path_glob: "Public/*"
+    data_type: public_asset
+    origin: unknown
+    rights_holder: unknown
+    permission_status: unknown
+    license: unknown
+    allowed_uses: []
+    prohibited_uses:
+      - training
+      - upload
+      - public_release
+    contains_sensitive_content: true
+    review_contact: "TBD - community/source governance review required"
+    notes: "Images and other public-facing assets. Public directory placement is not a license assertion."
+  - source_id: social_preview
+    path_glob: "social_preview.png"
+    data_type: public_asset
+    origin: unknown
+    rights_holder: unknown
+    permission_status: unknown
+    license: unknown
+    allowed_uses: []
+    prohibited_uses:
+      - training
+      - upload
+      - public_release
+    contains_sensitive_content: true
+    review_contact: "TBD - community/source governance review required"
+    notes: "Repository social preview image. Approval is not asserted by repository presence."

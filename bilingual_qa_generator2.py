@@ -20,6 +20,8 @@ import google.generativeai as genai
 from dotenv import load_dotenv
 from tqdm import tqdm
 
+from stoney_config import load_stoney_config
+
 
 logging.basicConfig(
     level=logging.INFO,
@@ -38,7 +40,8 @@ class BilingualQAGeneratorV2:
             raise ValueError("GOOGLE_API_KEY not found in environment variables")
 
         genai.configure(api_key=api_key)
-        self.model_name = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+        self.config = load_stoney_config(validate_finetune=False)
+        self.model_name = self.config.gemini_qa_model
         self.model = genai.GenerativeModel(
             self.model_name,
             generation_config={"response_mime_type": "application/json"},

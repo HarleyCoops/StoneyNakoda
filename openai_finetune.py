@@ -3,11 +3,15 @@ import json
 import time
 import logging
 import io
+from dataclasses import dataclass
 from pathlib import Path
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Mapping, Optional, Sequence
 from dotenv import load_dotenv
 from openai import OpenAI
+
+from scripts.validate_source_manifest import assert_paths_allowed_for_use
+from stoney_config import load_stoney_config
 
 try:
     from huggingface_hub import HfApi
@@ -37,6 +41,92 @@ STATUS_TO_INDEX: Dict[str, int] = {
     "expired": -4,
 }
 
+
+TRUE_VALUES = {"1", "true", "yes", "y", "on"}
+FALSE_VALUES = {"0", "false", "no", "n", "off"}
+
+
+@dataclass(frozen=True)
+class HuggingFacePublishConfig:
+    """Resolved Hugging Face publishing configuration."""
+
+    enabled: bool
+    token: Optional[str]
+    repo_id: Optional[str]
+    private: bool
+    allow_public_upload: bool
+
+
+def _env_flag(env: Mapping[str, str], name: str, default: bool) -> bool:
+    """Parse a boolean environment variable with explicit true/false values."""
+
+    raw = env.get(name)
+    if raw is None or raw == "":
+        return default
+    normalized = raw.strip().lower()
+    if normalized in TRUE_VALUES:
+        return True
+    if normalized in FALSE_VALUES:
+        return False
+    raise ValueError(f"{name} must be a boolean value, got {raw!r}")
+
+
+def build_hf_publish_config(env: Mapping[str, str] | None = None) -> HuggingFacePublishConfig:
+    """Resolve safe Hugging Face publishing defaults from environment variables.
+
+    Args:
+        env: Optional environment mapping. Defaults to `os.environ`.
+
+    Returns:
+        Safe publishing configuration.
+
+    Raises:
+        ValueError: When publishing is enabled but explicit approvals are missing.
+    """
+
+    values = os.environ if env is None else env
+    enabled = _env_flag(values, "HUGGINGFACE_PUBLISH", False)
+    private = _env_flag(values, "HUGGINGFACE_DATASET_PRIVATE", True)
+    allow_public_upload = _env_flag(values, "ALLOW_PUBLIC_DATASET_UPLOAD", False)
+    token = values.get("HUGGINGFACE_TOKEN") or None
+    repo_id = values.get("HUGGINGFACE_DATASET_REPO") or None
+
+    if enabled and (not token or not repo_id):
+        raise ValueError(
+            "HUGGINGFACE_PUBLISH=true requires HUGGINGFACE_TOKEN and HUGGINGFACE_DATASET_REPO."
+        )
+    if enabled and not private and not allow_public_upload:
+        raise ValueError(
+            "Public dataset upload requires HUGGINGFACE_PUBLISH=true, "
+            "HUGGINGFACE_DATASET_PRIVATE=false, and ALLOW_PUBLIC_DATASET_UPLOAD=true."
+        )
+    return HuggingFacePublishConfig(
+        enabled=enabled,
+        token=token,
+        repo_id=repo_id,
+        private=private,
+        allow_public_upload=allow_public_upload,
+    )
+
+
+def assert_hf_publish_allowed(paths: Sequence[str | Path], manifest_path: Path | None = None) -> None:
+    """Refuse Hugging Face publishing unless every source is public-release approved."""
+
+    if manifest_path is None:
+        assert_paths_allowed_for_use(paths, "public_release")
+    else:
+        assert_paths_allowed_for_use(paths, "public_release", manifest_path)
+
+
+def assert_openai_training_allowed(paths: Sequence[str | Path], manifest_path: Path | None = None) -> None:
+    """Refuse fine-tuning unless every training artifact is training-approved."""
+
+    if manifest_path is None:
+        assert_paths_allowed_for_use(paths, "training")
+    else:
+        assert_paths_allowed_for_use(paths, "training", manifest_path)
+
+
 class OpenAIFineTuner:
     def __init__(self):
         """Initialize the OpenAI fine-tuner with API key and file paths."""
@@ -62,16 +152,18 @@ class OpenAIFineTuner:
 
         logger.info(f"Found training file: {self.train_file}")
         logger.info(f"Found validation file: {self.valid_file}")
-        self.fine_tune_model = os.getenv("OPENAI_FINETUNE_MODEL", os.getenv("OPENAI_MODEL", "gpt-4.1-2025-04-14"))
+        self.config = load_stoney_config()
+        self.fine_tune_model = self.config.openai_finetune_model
         logger.info("Using fine-tune base model: %s", self.fine_tune_model)
 
         # Hugging Face dataset publishing
-        self.hf_token = os.getenv("HUGGINGFACE_TOKEN")
-        self.hf_repo_id = os.getenv("HUGGINGFACE_DATASET_REPO")
-        private_flag = os.getenv("HUGGINGFACE_DATASET_PRIVATE", "false").strip().lower()
-        self.hf_private = private_flag in {"1", "true", "yes", "y", "on"}
+        self.hf_publish_config = build_hf_publish_config()
+        self.hf_token = self.hf_publish_config.token
+        self.hf_repo_id = self.hf_publish_config.repo_id
+        self.hf_private = self.hf_publish_config.private
         self.hf_api: Optional[HfApi] = None
-        if self.hf_token and self.hf_repo_id:
+        if self.hf_publish_config.enabled:
+            assert_hf_publish_allowed([self.train_file, self.valid_file])
             if HfApi is None:
                 raise ImportError(
                     "huggingface_hub is required for dataset publishing but is not installed."
@@ -79,9 +171,10 @@ class OpenAIFineTuner:
             self.hf_api = HfApi(token=self.hf_token)
             logger.info("Hugging Face dataset publishing enabled for repo %s", self.hf_repo_id)
         else:
-            logger.info(
-                "Hugging Face dataset publishing disabled (set HUGGINGFACE_TOKEN and "
-                "HUGGINGFACE_DATASET_REPO to enable)."
+            logger.warning(
+                "Hugging Face dataset publishing disabled. Set HUGGINGFACE_PUBLISH=true, "
+                "HUGGINGFACE_TOKEN, and HUGGINGFACE_DATASET_REPO to enable; datasets are "
+                "private by default and manifest-gated before upload."
             )
 
         # Weights & Biases experiment tracking
@@ -319,6 +412,9 @@ class OpenAIFineTuner:
                     )
             else:
                 logger.info("Skipping Hugging Face dataset publishing step (disabled).")
+
+            logger.info("Validating source manifest approval for OpenAI fine-tuning")
+            assert_openai_training_allowed([self.train_file, self.valid_file])
 
             # Step 1: Upload files
             logger.info("Step 1/3: Uploading files to OpenAI")

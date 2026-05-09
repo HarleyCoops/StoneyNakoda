@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Dict, Iterable, List, Sequence
+from typing import Dict, List, Sequence
 
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -16,6 +16,7 @@ from .config import (
     TASK_GENERATION_TEMPERATURE,
     ensure_directories,
 )
+from .llm_json import LLMJsonClient, env_flag, load_json_schema
 from .models import GrammarRule, RLTrainingTask
 
 logger = logging.getLogger(__name__)
@@ -69,6 +70,7 @@ class StoneyTaskGenerator:
         temperature: float = TASK_GENERATION_TEMPERATURE,
         max_output_tokens: int = 2000,
         max_tasks_per_rule: int = 6,
+        allow_json_fallback: bool | None = None,
     ) -> None:
         ensure_directories()
         load_dotenv()
@@ -77,13 +79,18 @@ class StoneyTaskGenerator:
         self.temperature = temperature
         self.max_output_tokens = max_output_tokens
         self.max_tasks_per_rule = max_tasks_per_rule
+        self.task_schema = load_json_schema("rl_task.schema.json")
+        self.json_client = LLMJsonClient(
+            self.client,
+            self.model,
+            allow_json_fallback=env_flag("STONEY_ALLOW_JSON_FALLBACK")
+            if allow_json_fallback is None
+            else allow_json_fallback,
+        )
 
     @retry(wait=wait_exponential(multiplier=1, min=2, max=20), stop=stop_after_attempt(3))
     def _call_model(self, prompt: str) -> Dict:
-        response = self.client.chat.completions.create(
-            model=self.model,
-            max_completion_tokens=self.max_output_tokens,
-            response_format={"type": "json_object"},
+        return self.json_client.create(
             messages=[
                 {
                     "role": "system",
@@ -94,11 +101,10 @@ class StoneyTaskGenerator:
                     "content": prompt,
                 },
             ],
+            schema=self.task_schema,
+            schema_name="rl_task_generation",
+            max_output_tokens=self.max_output_tokens,
         )
-        content_text = response.choices[0].message.content
-        if not isinstance(content_text, str):
-            raise ValueError(f"Expected string response, got {type(content_text)}")
-        return json.loads(content_text)
 
     def generate_tasks(self, rules: Sequence[GrammarRule]) -> List[RLTrainingTask]:
         """Generate and persist RL tasks for each grammar rule."""

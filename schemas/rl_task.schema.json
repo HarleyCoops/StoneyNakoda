@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/stoney-nakoda/rl_task.schema.json",
+  "title": "RL Task Generation Payload",
+  "type": "object",
+  "required": ["tasks"],
+  "additionalProperties": false,
+  "properties": {
+    "tasks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "task_type",
+          "prompt",
+          "ideal_answer",
+          "verification_pattern",
+          "hints",
+          "difficulty"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "task_type": {
+            "type": "string",
+            "enum": [
+              "morphology",
+              "forward_translation",
+              "reverse_translation",
+              "pattern_identification",
+              "syntax_analysis"
+            ]
+          },
+          "prompt": {
+            "type": "string",
+            "minLength": 1
+          },
+          "ideal_answer": {
+            "type": "string",
+            "minLength": 1
+          },
+          "verification_pattern": {
+            "type": "string"
+          },
+          "hints": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "difficulty": {
+            "type": "string",
+            "enum": ["easy", "medium", "hard"]
+          }
+        }
+      }
+    }
+  }
+}

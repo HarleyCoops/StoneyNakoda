@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/stoney-nakoda/grammar_rule.schema.json",
+  "title": "Grammar Rule Extraction Payload",
+  "type": "object",
+  "required": ["rules"],
+  "additionalProperties": false,
+  "properties": {
+    "rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "title",
+          "description",
+          "category",
+          "stoney_examples",
+          "english_examples",
+          "verification_hint",
+          "confidence",
+          "page_number",
+          "chunk_id"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "morphology",
+              "syntax",
+              "phonology",
+              "translation",
+              "semantics",
+              "phonotactics",
+              "misc"
+            ]
+          },
+          "stoney_examples": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "english_examples": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "verification_hint": {
+            "type": "string"
+          },
+          "confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "page_number": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "chunk_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  }
+}

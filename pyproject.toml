@@ -1,0 +1,63 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "stoney-nakoda-pipeline"
+version = "0.1.0"
+description = "Research pipeline utilities for Stoney Nakoda dictionary fine-tuning and grammar RL experiments."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "python-dotenv>=1.0.0",
+  "openai>=1.40.0",
+  "pymupdf>=1.24.0",
+  "tenacity>=8.2.0",
+  "google-generativeai>=0.3.0",
+  "tqdm>=4.65.0",
+  "PyYAML>=6.0.1",
+  "jsonschema>=4.21.1",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0.0",
+  "ruff>=0.5.0",
+]
+hf = [
+  "huggingface_hub>=0.23.0",
+]
+wandb = [
+  "wandb>=0.16.0",
+]
+rl = []
+extraction = [
+  "pymupdf>=1.24.0",
+  "openai>=1.40.0",
+  "tenacity>=8.2.0",
+]
+
+[tool.setuptools]
+py-modules = [
+  "bilingual_qa_generator",
+  "bilingual_qa_generator2",
+  "convert_data_format",
+  "finetunesetup",
+  "openai_finetune",
+  "run_stoney_grammar_pipeline",
+  "stoney_config",
+]
+
+[tool.setuptools.packages.find]
+include = ["stoney_rl_grammar*"]
+
+[tool.pytest.ini_options]
+python_files = ["test_*.py", "smoke_test_*.py"]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E9", "F63", "F7", "F82"]
