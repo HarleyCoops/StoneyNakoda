@@ -373,7 +373,7 @@ The Stoney Nakoda RL environment is a custom Verifiers/Prime Intellect gym envir
 pip install -e environments/stoney_nakoda_translation
 
 # Verify installation
-python -c "from stoney_nakoda_translation.environment import StoneyNakodaEnv; print('OK')"
+python -c "from stoney_nakoda_translation import load_environment; print('OK')"
 ```
 
 ### Forwarding Datasets to RL Runs
@@ -382,7 +382,7 @@ After running the grammar pipeline, forward generated datasets to your RL traini
 
 ```python
 # Example: GRPO training with Stoney environment
-from stoney_nakoda_translation.environment import StoneyNakodaEnv
+from stoney_nakoda_translation import load_environment
 import json
 
 # Load RL tasks
@@ -390,7 +390,7 @@ with open("data/training_datasets_stoney.jsonl", "r") as f:
     tasks = [json.loads(line) for line in f]
 
 # Initialize environment
-env = StoneyNakodaEnv(tasks=tasks)
+env = load_environment(dataset_path="data/training_datasets_stoney.jsonl")
 
 # Run GRPO training (pseudocode)
 # trainer = GRPOTrainer(env=env, model="ft:gpt-4.1-mini-2025-04-14:...")

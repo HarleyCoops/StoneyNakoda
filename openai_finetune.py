@@ -390,6 +390,9 @@ class OpenAIFineTuner:
         """Run the complete fine-tuning process."""
         dataset_stats: Optional[Dict[str, int]] = None
         try:
+            logger.info("Validating source manifest approval for OpenAI fine-tuning")
+            assert_openai_training_allowed([self.train_file, self.valid_file])
+
             if self.wandb_enabled and not self.wandb_run:
                 self._init_wandb()
                 self._wandb_log({"stage_index": -1, "stage": "initialization"})
@@ -412,9 +415,6 @@ class OpenAIFineTuner:
                     )
             else:
                 logger.info("Skipping Hugging Face dataset publishing step (disabled).")
-
-            logger.info("Validating source manifest approval for OpenAI fine-tuning")
-            assert_openai_training_allowed([self.train_file, self.valid_file])
 
             # Step 1: Upload files
             logger.info("Step 1/3: Uploading files to OpenAI")
