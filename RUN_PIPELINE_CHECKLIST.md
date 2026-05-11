@@ -70,18 +70,20 @@ python run_stoney_grammar_pipeline.py
 ```
 Pipeline flow:
 1. `pdf_ingest.load_page_assets` renders the source PDF into 127 base64 PNG + text chunks. 【F:stoney_rl_grammar/pdf_ingest.py†L14-L35】
-2. `StoneyGrammarExtractor.extract_rules` calls Chat Completions with structured JSON Schema output via `stoney_rl_grammar/llm_json.py`, then validates every payload before persisting per-chunk JSON under `data/grammar_extracted_stoney/`. 【F:stoney_rl_grammar/rule_extractor.py†L62-L165】
+2. `StoneyGrammarExtractor.extract_rules` calls Chat Completions using the original prompt-only JSON path for vision extraction, then validates every parsed payload against `schemas/grammar_rule.schema.json` before persisting per-chunk JSON under `data/grammar_extracted_stoney/`. 【F:stoney_rl_grammar/rule_extractor.py†L62-L165】
 3. `RuleOrganizer.organize` filters, deduplicates, and writes curated rules to `data/rl_training_rules_stoney.json`. 【F:stoney_rl_grammar/rule_organizer.py†L17-L81】
 4. `StoneyTaskGenerator.generate_tasks` streams RL-ready tasks to `data/training_datasets_stoney.jsonl`. 【F:stoney_rl_grammar/task_generator.py†L63-L140】
 
 ### 2.2 Structured JSON API path
 
-The previous blocker was caused by passing `response_format` to `client.responses.create`. The grammar pipeline now uses a single wrapper, `stoney_rl_grammar/llm_json.py`, which calls `client.chat.completions.create` with `response_format={"type": "json_schema", ...}` and validates results against:
+The previous blocker was caused by passing `response_format` to `client.responses.create`. The grammar pipeline now uses a single wrapper, `stoney_rl_grammar/llm_json.py`, with two paths:
 
-- `schemas/grammar_rule.schema.json`
-- `schemas/rl_task.schema.json`
+- Vision extraction defaults to `STONEY_EXTRACTION_RESPONSE_FORMAT=json_prompt`, which restores the older working call shape and validates the parsed JSON against `schemas/grammar_rule.schema.json`.
+- Text-only task generation defaults to `STONEY_TASK_RESPONSE_FORMAT=json_schema` and validates against `schemas/rl_task.schema.json`.
 
-Strict JSON-object fallback is disabled by default. It can be enabled only for internal compatibility experiments with:
+Extraction uses an 8,000 completion-token cap by default. A smaller cap caused GPT-5 to return empty content with `finish_reason='length'` on page-level image extraction.
+
+Schema-constrained extraction can be tested explicitly with `STONEY_EXTRACTION_RESPONSE_FORMAT=json_schema`. Strict JSON-object fallback is disabled by default. It can be enabled only for internal compatibility experiments with:
 
 ```bash
 STONEY_ALLOW_JSON_FALLBACK=true python run_stoney_grammar_pipeline.py

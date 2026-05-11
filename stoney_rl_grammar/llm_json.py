@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import re
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
@@ -41,6 +42,19 @@ def load_json_schema(name: str) -> dict[str, Any]:
     return schema
 
 
+def _response_diagnostics(response: Any) -> str:
+    """Return compact response diagnostics for logs/errors."""
+
+    try:
+        choice = response.choices[0]
+    except (AttributeError, IndexError, TypeError):
+        return "finish_reason=<unavailable>, refusal=<unavailable>"
+    message = getattr(choice, "message", None)
+    refusal = getattr(message, "refusal", None) if message is not None else None
+    finish_reason = getattr(choice, "finish_reason", None)
+    return f"finish_reason={finish_reason!r}, refusal={refusal!r}"
+
+
 def _extract_message_content(response: Any) -> str:
     """Extract text content from a Chat Completions response."""
 
@@ -50,14 +64,25 @@ def _extract_message_content(response: Any) -> str:
         raise LLMJsonError("Unable to read model response content") from exc
     if not isinstance(content, str):
         raise LLMJsonError(f"Expected string response content, got {type(content)}")
+    if not content.strip():
+        raise LLMJsonError(f"Model returned empty content ({_response_diagnostics(response)})")
     return content
 
 
 def parse_json_object(content: str) -> dict[str, Any]:
     """Parse strict JSON object text."""
 
+    cleaned = content.strip()
+    if cleaned.startswith("```"):
+        cleaned = re.sub(r"^```(?:json)?\s*", "", cleaned)
+        cleaned = re.sub(r"\s*```$", "", cleaned)
+    if not cleaned.startswith("{"):
+        match = re.search(r"\{[\s\S]*\}", cleaned)
+        if match:
+            cleaned = match.group()
+
     try:
-        payload = json.loads(content)
+        payload = json.loads(cleaned)
     except json.JSONDecodeError as exc:
         raise LLMJsonError(f"Model returned invalid JSON: {exc}") from exc
     if not isinstance(payload, dict):
@@ -96,6 +121,7 @@ class LLMJsonClient:
         schema: Mapping[str, Any],
         schema_name: str,
         max_output_tokens: int,
+        response_format_mode: str = "json_schema",
     ) -> dict[str, Any]:
         """Create and validate a schema-constrained JSON response.
 
@@ -104,6 +130,7 @@ class LLMJsonClient:
             schema: JSON Schema that the model response must satisfy.
             schema_name: Name sent to the OpenAI structured-output API.
             max_output_tokens: Maximum completion tokens.
+            response_format_mode: `json_schema`, `json_object`, or `json_prompt`.
 
         Returns:
             Parsed and schema-validated JSON object.
@@ -113,20 +140,29 @@ class LLMJsonClient:
         """
 
         jsonschema.Draft202012Validator.check_schema(schema)
-        try:
-            response = self.client.chat.completions.create(
-                model=self.model,
-                max_completion_tokens=max_output_tokens,
-                response_format={
-                    "type": "json_schema",
-                    "json_schema": {
-                        "name": schema_name,
-                        "strict": True,
-                        "schema": dict(schema),
-                    },
+        request: dict[str, Any] = {
+            "model": self.model,
+            "max_completion_tokens": max_output_tokens,
+            "messages": list(messages),
+        }
+        if response_format_mode == "json_schema":
+            request["response_format"] = {
+                "type": "json_schema",
+                "json_schema": {
+                    "name": schema_name,
+                    "strict": True,
+                    "schema": dict(schema),
                 },
-                messages=list(messages),
+            }
+        elif response_format_mode == "json_object":
+            request["response_format"] = {"type": "json_object"}
+        elif response_format_mode != "json_prompt":
+            raise LLMJsonError(
+                "response_format_mode must be one of: json_schema, json_object, json_prompt"
             )
+
+        try:
+            response = self.client.chat.completions.create(**request)
         except Exception:
             if not self.allow_json_fallback:
                 raise

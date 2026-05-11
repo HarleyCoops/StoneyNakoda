@@ -1117,7 +1117,7 @@ The RL Grammar Gym workflow now lives in this repo with Stoney-specific code and
    `stoney_rl_grammar/pdf_ingest.py` renders each PDF page to a PNG image using PyMuPDF.
 
 2. **Vision/Linguistic extraction**
-   `stoney_rl_grammar/rule_extractor.py` sends page images through the shared structured-output wrapper in `stoney_rl_grammar/llm_json.py` (configurable via `OPENAI_EXTRACTION_MODEL` in `.env`) and validates each response against `schemas/grammar_rule.schema.json`.
+   `stoney_rl_grammar/rule_extractor.py` sends page images through the shared JSON wrapper in `stoney_rl_grammar/llm_json.py` (configurable via `OPENAI_EXTRACTION_MODEL` in `.env`). Vision extraction defaults to the older prompt-only JSON call path, uses a larger 8,000-token completion cap for GPT-5, and validates each parsed response against `schemas/grammar_rule.schema.json`.
 
 3. **Rule organisation**
    `stoney_rl_grammar/rule_organizer.py` filters low-confidence or duplicate rules and builds a compact catalogue the RL tooling can consume.
@@ -1143,7 +1143,7 @@ Environment configuration comes from `.env`:
 
 - Set `OPENAI_API_KEY` before running.  
 - Override `OPENAI_EXTRACTION_MODEL` or `OPENAI_TASK_MODEL` if you want a specific model for grammar extraction or task generation.
-- Structured JSON Schema output is used by default; strict JSON fallback requires `STONEY_ALLOW_JSON_FALLBACK=true`.
+- Vision extraction defaults to `STONEY_EXTRACTION_RESPONSE_FORMAT=json_prompt`; use `json_schema` only for compatibility experiments after a smoke test. Strict JSON fallback requires `STONEY_ALLOW_JSON_FALLBACK=true`.
 
 > The legacy dictionary extraction/fine-tuning scripts remain unchanged, so you can keep running those while iterating on the grammar RL pipeline in parallel.
 

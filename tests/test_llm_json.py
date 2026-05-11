@@ -152,3 +152,64 @@ def test_json_fallback_is_only_used_when_enabled() -> None:
 
     assert enabled_completions.calls[0]["response_format"]["type"] == "json_schema"
     assert enabled_completions.calls[1]["response_format"]["type"] == "json_object"
+
+
+def test_json_prompt_mode_omits_response_format_and_still_validates() -> None:
+    schema = load_json_schema("grammar_rule.schema.json")
+    completions = FakeCompletions(
+        [
+            {
+                "rules": [
+                    {
+                        "title": "Word order",
+                        "description": "A word-order rule.",
+                        "category": "syntax",
+                        "stoney_examples": [],
+                        "english_examples": [],
+                        "verification_hint": "",
+                        "confidence": 0.7,
+                        "page_number": 1,
+                        "chunk_id": "page_001_chunk_00",
+                    }
+                ]
+            }
+        ]
+    )
+    client = LLMJsonClient(FakeClient(completions), "test-model")
+
+    client.create(
+        messages=[{"role": "user", "content": "extract"}],
+        schema=schema,
+        schema_name="grammar_rule_extraction",
+        max_output_tokens=2000,
+        response_format_mode="json_prompt",
+    )
+
+    assert "response_format" not in completions.calls[0]
+
+
+def test_empty_model_content_includes_response_diagnostics() -> None:
+    schema = load_json_schema("rl_task.schema.json")
+    completions = FakeCompletions([{}])
+
+    def create_empty(**kwargs: Any) -> Any:
+        completions.calls.append(kwargs)
+        return SimpleNamespace(
+            choices=[
+                SimpleNamespace(
+                    finish_reason="content_filter",
+                    message=SimpleNamespace(content="", refusal="cannot process page"),
+                )
+            ]
+        )
+
+    completions.create = create_empty  # type: ignore[method-assign]
+    client = LLMJsonClient(FakeClient(completions), "test-model")
+
+    with pytest.raises(LLMJsonError, match="finish_reason='content_filter'"):
+        client.create(
+            messages=[{"role": "user", "content": "generate"}],
+            schema=schema,
+            schema_name="rl_task_generation",
+            max_output_tokens=2000,
+        )

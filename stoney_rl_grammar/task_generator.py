@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 from typing import Dict, List, Sequence
 
 from dotenv import load_dotenv
@@ -71,6 +72,7 @@ class StoneyTaskGenerator:
         max_output_tokens: int = 2000,
         max_tasks_per_rule: int = 6,
         allow_json_fallback: bool | None = None,
+        response_format_mode: str | None = None,
     ) -> None:
         ensure_directories()
         load_dotenv()
@@ -79,6 +81,10 @@ class StoneyTaskGenerator:
         self.temperature = temperature
         self.max_output_tokens = max_output_tokens
         self.max_tasks_per_rule = max_tasks_per_rule
+        self.response_format_mode = response_format_mode or os.getenv(
+            "STONEY_TASK_RESPONSE_FORMAT",
+            "json_schema",
+        )
         self.task_schema = load_json_schema("rl_task.schema.json")
         self.json_client = LLMJsonClient(
             self.client,
@@ -104,6 +110,7 @@ class StoneyTaskGenerator:
             schema=self.task_schema,
             schema_name="rl_task_generation",
             max_output_tokens=self.max_output_tokens,
+            response_format_mode=self.response_format_mode,
         )
 
     def generate_tasks(self, rules: Sequence[GrammarRule]) -> List[RLTrainingTask]:

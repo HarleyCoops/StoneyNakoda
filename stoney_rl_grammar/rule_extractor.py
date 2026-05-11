@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 from typing import Dict, List, Sequence
 
 from dotenv import load_dotenv
@@ -40,7 +41,7 @@ For each rule provide:
 - page_number: {chunk.page_number}
 - chunk_id: "{chunk.chunk_id()}"
 
-Return JSON with schema:
+Return only a JSON object with this schema. Do not wrap the JSON in markdown:
 {{
   "rules": [
     {{
@@ -67,8 +68,9 @@ class StoneyGrammarExtractor:
         self,
         model: str = DEFAULT_EXTRACTION_MODEL,
         temperature: float = 0.2,
-        max_output_tokens: int = 2000,
+        max_output_tokens: int = 8000,
         allow_json_fallback: bool | None = None,
+        response_format_mode: str | None = None,
     ) -> None:
         ensure_directories()
         load_dotenv()
@@ -76,6 +78,10 @@ class StoneyGrammarExtractor:
         self.model = model
         self.temperature = temperature
         self.max_output_tokens = max_output_tokens
+        self.response_format_mode = response_format_mode or os.getenv(
+            "STONEY_EXTRACTION_RESPONSE_FORMAT",
+            "json_prompt",
+        )
         self.grammar_schema = load_json_schema("grammar_rule.schema.json")
         self.json_client = LLMJsonClient(
             self.client,
@@ -114,6 +120,7 @@ class StoneyGrammarExtractor:
             schema=self.grammar_schema,
             schema_name="grammar_rule_extraction",
             max_output_tokens=self.max_output_tokens,
+            response_format_mode=self.response_format_mode,
         )
 
     def extract_rules(self, chunks: Sequence[PageChunk]) -> List[GrammarRule]:
