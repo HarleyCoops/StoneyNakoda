@@ -64,17 +64,32 @@ records:
     path_glob: "OpenAIFineTune/*.jsonl"
     data_type: fine_tuning_dataset
     origin: generated_from_dictionary_pipeline
-    rights_holder: unknown
-    permission_status: unknown
-    license: unknown
-    allowed_uses: []
-    prohibited_uses:
+    rights_holder: project_authorized_generated_derivative
+    permission_status: approved_for_training
+    license: project-specific approval; external license unspecified
+    allowed_uses:
       - training
+    prohibited_uses:
       - upload
       - public_release
     contains_sensitive_content: true
-    review_contact: "TBD - community/source governance review required"
-    notes: "OpenAI fine-tuning JSONL outputs. Must be reviewed before training or upload."
+    review_contact: "Project owner confirmation in Codex run on 2026-05-26"
+    notes: "Generated OpenAI fine-tuning JSONL outputs approved for this training run. Raw source dictionary records remain unapproved for direct upload."
+  - source_id: openai_finetune_jsonl_public_release
+    path_glob: "OpenAIFineTune/*.jsonl"
+    data_type: fine_tuning_dataset
+    origin: generated_from_dictionary_pipeline
+    rights_holder: project_authorized_generated_derivative
+    permission_status: approved_for_public_release
+    license: project-specific approval; external license unspecified
+    allowed_uses:
+      - upload
+      - public_release
+      - publishing
+    prohibited_uses: []
+    contains_sensitive_content: true
+    review_contact: "Project owner confirmation in Codex run on 2026-05-26"
+    notes: "Generated OpenAI fine-tuning JSONL outputs approved for Hugging Face dataset publication. Raw source dictionary records remain unapproved for direct upload."
   - source_id: grammar_pdf
     path_glob: "Stoney; A Grammar of the Stony Language.pdf"
     data_type: grammar_pdf

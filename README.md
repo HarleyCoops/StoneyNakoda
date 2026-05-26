@@ -4,6 +4,7 @@ A working model of the Stoney Nakoda language has been developed and is now avai
 
 - **Model App**: [Stoney Language Model App](https://huggingface.co/spaces/HarleyCooper/StoneyApp)
 - **Training Data**: [StoneyNakoda Training Dataset](https://huggingface.co/datasets/HarleyCooper/StoneyNakoda/blob/main/zSTONEY1_TRAINING_SET.jsonl)
+- **May 2026 Pipeline Test Dataset**: [HarleyCooper/Stoney10kRL](https://huggingface.co/datasets/HarleyCooper/Stoney10kRL)
 
 ## Data Governance First
 
@@ -15,6 +16,49 @@ python scripts/check_config.py
 ```
 
 The code defaults uncertain sources to `unknown` and refuses training or upload workflows unless human/community review has explicitly approved the relevant manifest records. The repository can enforce gates and safe defaults; it does not certify cultural permission or speaker approval.
+
+## May 26, 2026 Pipeline Verification
+
+The dictionary fine-tuning path was verified end-to-end on May 26, 2026:
+
+- Hugging Face dataset publishing succeeded for `HarleyCooper/Stoney10kRL`.
+- OpenAI training and validation file upload succeeded.
+- Supervised fine-tuning on `gpt-4.1-2025-04-14` succeeded.
+- Weights & Biases telemetry synced for the run.
+
+Baseline fine-tune:
+
+| Field | Value |
+| --- | --- |
+| Job ID | `ftjob-XrHZY5EH4oIH6JZpY09iX3S4` |
+| Output model | `ft:gpt-4.1-2025-04-14:personal::DjrvGVM7` |
+| Base model | `gpt-4.1-2025-04-14` |
+| Training method | Supervised |
+| Training examples | 8,000 |
+| Validation examples | 2,000 |
+| Trained tokens | 3,755,229 |
+| Epochs | 3 |
+| Batch size | 16 |
+| LR multiplier | 2 |
+| Seed | 1421697702 |
+| Train loss | 0.958 |
+| Validation loss | 1.046 |
+| Full validation loss | 1.039 |
+| Observed fine-tune cost | USD $94.88 |
+| Step 500 checkpoint | `ft:gpt-4.1-2025-04-14:personal::DjrvEWQM:ckpt-step-500` |
+| Step 1000 checkpoint | `ft:gpt-4.1-2025-04-14:personal::DjrvG1S3:ckpt-step-1000` |
+| Step 1500 checkpoint | `ft:gpt-4.1-2025-04-14:personal::DjrvGVM7` |
+
+Run notes:
+
+- This was a successful pipeline smoke test, not the final fresh 10,000-pair model.
+- The completed fine-tune used the pre-existing `OpenAIFineTune/stoney_train.jsonl` and `OpenAIFineTune/stoney_valid.jsonl` split, last written before the May 26 fresh generation run.
+- The fresh `Dictionaries/bilingual_training_set_v2.jsonl` generation was still running during the smoke test. After it reaches the intended 10,000 valid Q&A rows, rerun `python finetunesetup.py`, republish the updated split, and launch the corrected fresh-10K fine-tune.
+- The $94.88 fine-tune spend consumed the available OpenAI credits during the concurrent grammar task-generation run, which produced temporary 429/quota failures. Credits were topped up before continuing the full run.
+
+Operational guardrail:
+
+`openai_finetune.py` reads only `OpenAIFineTune/stoney_train.jsonl` and `OpenAIFineTune/stoney_valid.jsonl`; it does not read `Dictionaries/bilingual_training_set_v2.jsonl` directly. Always verify the Q&A line count and rerun `python finetunesetup.py` before starting a fine-tune that is meant to use a newly generated dataset.
 
 
 Any First Nations community seeking to apply this approach to their own language is warmly invited to reach out.
@@ -166,8 +210,8 @@ cp .env.example .env
 **Phase 1: Dictionary→Fine-tuning (Supervised Learning)**
 
 ```bash
-# Step 1: Generate 150K Q&A pairs from dictionaries (takes several hours)
-python bilingual_qa_generator.py
+# Step 1: Generate 10K enriched Q&A pairs from dictionaries (takes several hours)
+python bilingual_qa_generator2.py
 
 # Step 2: Convert to OpenAI format and split train/validation
 python finetunesetup.py
@@ -203,7 +247,7 @@ pip install -e environments/stoney_nakoda_translation
 
 **Option A: Dictionary Pipeline Only** (Fastest path to working model)
 ```bash
-python bilingual_qa_generator.py && python finetunesetup.py && python openai_finetune.py
+python bilingual_qa_generator2.py && python finetunesetup.py && python openai_finetune.py
 ```
 
 **Option B: Grammar RL Pipeline Only** (For grammatical precision)
@@ -223,14 +267,14 @@ After running both pipelines, you'll have:
 
 ### Monitoring Progress
 
-- **Dictionary Pipeline**: Watch `tqdm` progress bars, check `Dictionaries/checkpoints/` for recovery points
+- **Dictionary Pipeline**: Watch `tqdm` progress bars, check `Dictionaries/checkpoints_v2/` for recovery points
 - **Fine-tuning**: Monitor OpenAI dashboard or W&B if configured
 - **Grammar Pipeline**: Check `data/grammar_extracted_stoney/*.json` for rule extraction quality
 
 ### Cost Estimates
 
-- **Google Gemini API**: ~$5-15 for 150K Q&A generation (depends on model)
-- **OpenAI Fine-tuning**: cost depends on the allowlisted `OPENAI_FINETUNE_MODEL`, dataset size, and epochs
+- **Google Gemini API**: cost depends on the configured `GEMINI_QA_MODEL` and the 10K target size
+- **OpenAI Fine-tuning**: cost depends on the allowlisted `OPENAI_FINETUNE_MODEL`, dataset size, and epochs. The May 26, 2026 8K/2K baseline run cost USD $94.88.
 - **Grammar Extraction**: ~$10-30 for vision model PDF processing
 - **Total**: ~$35-95 for complete pipeline
 
@@ -459,13 +503,13 @@ The project supports **two independent pipelines** that can be run separately or
 **Step 1: Generate Training Data**
 
 ```bash
-python bilingual_qa_generator.py
+python bilingual_qa_generator2.py
 ```
 
 -   Processes `Dictionaries/english_dictionary.jsonl` & `Dictionaries/stoney_dictionary.jsonl`
--   Uses Google Gemini to generate 150,000 Q&A pairs (75K per language)
--   Produces `Dictionaries/bilingual_training_set.jsonl`
--   Creates checkpoints every 1000 pairs in `Dictionaries/checkpoints/`
+-   Uses Google Gemini to generate 10,000 enriched Q&A pairs (5K per language)
+-   Produces `Dictionaries/bilingual_training_set_v2.jsonl`
+-   Creates checkpoints every 1000 pairs in `Dictionaries/checkpoints_v2/`
 
 **Step 2: Prepare Fine-tuning Data**
 
@@ -476,6 +520,7 @@ python finetunesetup.py
 -   Converts Q&A pairs to OpenAI messages format
 -   Applies 80/20 train/validation split
 -   Outputs `OpenAIFineTune/stoney_train.jsonl` & `OpenAIFineTune/stoney_valid.jsonl`
+-   Must be rerun after every new Q&A generation run before launching `openai_finetune.py`
 
 **Step 3: Fine-tune Model**
 
