@@ -13,6 +13,8 @@ import time  # For timing operations
 from datetime import datetime  # For timestamps
 import google.generativeai as genai  # Google's AI tools
 
+from stoney_config import load_stoney_config
+
 # Set up our logging system to track what's happening
 logging.basicConfig(
     level=logging.INFO,
@@ -28,7 +30,8 @@ class BilingualQAGenerator:
             raise ValueError("GOOGLE_API_KEY not found in environment variables")
         
         genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel('gemini-1.0-pro')
+        config = load_stoney_config(validate_finetune=False)
+        self.model = genai.GenerativeModel(config.gemini_qa_model)
         self.english_dict_file = Path(english_dict_file)
         self.stoney_dict_file = Path(stoney_dict_file)
         

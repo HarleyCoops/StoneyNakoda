@@ -36,9 +36,11 @@ GOOGLE_API_KEY=your-google-api-key-here
 
 ```bash
 # OPTIONAL: Hugging Face dataset publishing
+HUGGINGFACE_PUBLISH=false
 HUGGINGFACE_TOKEN=hf_your-hf-token-here
 HUGGINGFACE_DATASET_REPO=username/stoney-nakoda-dataset
-HUGGINGFACE_DATASET_PRIVATE=false
+HUGGINGFACE_DATASET_PRIVATE=true
+ALLOW_PUBLIC_DATASET_UPLOAD=false
 
 # OPTIONAL: Weights & Biases experiment tracking
 WANDB_API_KEY=your-wandb-api-key-here
@@ -52,22 +54,16 @@ WANDB_RUN_NAME=stoney-run-001
 **IMPORTANT:** These models have cost and capability implications. Update this file when changing models.
 
 ```bash
-# Base model for fine-tuning (default: gpt-4o-mini)
-# Options: gpt-4o-mini, gpt-3.5-turbo, gpt-4
-OPENAI_MODEL=gpt-4o-mini
-OPENAI_FINETUNE_MODEL=gpt-4o-mini
-
-# Responses API model for grammar extraction/task generation (default: gpt-5)
-# Options: gpt-5, gpt-4-turbo, gpt-4
-OPENAI_RESPONSES_MODEL=gpt-5
+# Purpose-specific OpenAI model references
+# OPENAI_MODEL is ignored by current code paths.
+OPENAI_CHAT_MODEL=gpt-4.1-mini-2025-04-14
+OPENAI_FINETUNE_MODEL=gpt-4.1-mini-2025-04-14
+OPENAI_EXTRACTION_MODEL=gpt-5
+OPENAI_TASK_MODEL=gpt-5
 
 # Gemini model for Q&A generation (default: gemini-2.5-pro)
 # Options: gemini-2.5-pro, gemini-2.0-flash-exp, gemini-1.0-pro
-GEMINI_MODEL=gemini-2.5-pro
-
-# Grammar pipeline-specific overrides (default to OPENAI_RESPONSES_MODEL)
-STONEY_EXTRACTION_MODEL=gpt-5
-STONEY_TASK_MODEL=gpt-5
+GEMINI_QA_MODEL=gemini-2.5-pro
 ```
 
 **Cost Estimates by Model:**
@@ -195,7 +191,7 @@ python openai_finetune.py
 ```
 
 **Expected Output:**
-- Fine-tuned model ID printed to console (e.g., `ft:gpt-4o-mini:org:model:abc123`)
+- Fine-tuned model ID printed to console (e.g., `ft:gpt-4.1-mini-2025-04-14:org:model:abc123`)
 - Optional: Dataset published to HuggingFace
 - Optional: Metrics logged to Weights & Biases
 
@@ -316,9 +312,10 @@ Use this template when documenting pipeline failures:
 **RULE:** When changing model names, retry policies, or cost estimates in this file, you MUST also update:
 
 1. `.env.example` - Document new model options
-2. `stoney_rl_grammar/config.py` - Update default model constants
-3. `openai_finetune.py` - Update fine-tune model fallback
-4. `bilingual_qa_generator2.py` - Update Gemini model reference
+2. `stoney_config.py` - Update default model constants and fine-tune allowlist
+3. `stoney_rl_grammar/config.py` - Confirm grammar model constants consume `stoney_config.py`
+4. `openai_finetune.py` - Confirm fine-tune model validation is still enforced
+5. `bilingual_qa_generator2.py` - Confirm Gemini model configuration still uses `GEMINI_QA_MODEL`
 
 ### Retry/Backoff Policies
 
@@ -376,7 +373,7 @@ The Stoney Nakoda RL environment is a custom Verifiers/Prime Intellect gym envir
 pip install -e environments/stoney_nakoda_translation
 
 # Verify installation
-python -c "from stoney_nakoda_translation.environment import StoneyNakodaEnv; print('OK')"
+python -c "from stoney_nakoda_translation import load_environment; print('OK')"
 ```
 
 ### Forwarding Datasets to RL Runs
@@ -385,7 +382,7 @@ After running the grammar pipeline, forward generated datasets to your RL traini
 
 ```python
 # Example: GRPO training with Stoney environment
-from stoney_nakoda_translation.environment import StoneyNakodaEnv
+from stoney_nakoda_translation import load_environment
 import json
 
 # Load RL tasks
@@ -393,10 +390,10 @@ with open("data/training_datasets_stoney.jsonl", "r") as f:
     tasks = [json.loads(line) for line in f]
 
 # Initialize environment
-env = StoneyNakodaEnv(tasks=tasks)
+env = load_environment(dataset_path="data/training_datasets_stoney.jsonl")
 
 # Run GRPO training (pseudocode)
-# trainer = GRPOTrainer(env=env, model="ft:gpt-4o-mini:...")
+# trainer = GRPOTrainer(env=env, model="ft:gpt-4.1-mini-2025-04-14:...")
 # trainer.train()
 ```
 

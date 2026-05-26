@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/stoney-nakoda/source_manifest.schema.json",
+  "title": "Stoney Nakoda Source Manifest",
+  "type": "object",
+  "required": ["schema_version", "records"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "records": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "source_id",
+          "path_glob",
+          "data_type",
+          "origin",
+          "rights_holder",
+          "permission_status",
+          "license",
+          "allowed_uses",
+          "prohibited_uses",
+          "contains_sensitive_content",
+          "review_contact",
+          "notes"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "source_id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]*$"
+          },
+          "path_glob": {
+            "type": "string",
+            "minLength": 1
+          },
+          "data_type": {
+            "type": "string",
+            "minLength": 1
+          },
+          "origin": {
+            "type": "string",
+            "minLength": 1
+          },
+          "rights_holder": {
+            "type": "string",
+            "minLength": 1
+          },
+          "permission_status": {
+            "type": "string",
+            "enum": [
+              "unknown",
+              "internal_only",
+              "approved_for_training",
+              "approved_for_public_release",
+              "restricted",
+              "removed_pending_review"
+            ]
+          },
+          "license": {
+            "type": "string",
+            "minLength": 1
+          },
+          "allowed_uses": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "uniqueItems": true
+          },
+          "prohibited_uses": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "uniqueItems": true
+          },
+          "contains_sensitive_content": {
+            "type": "boolean"
+          },
+          "review_contact": {
+            "type": "string",
+            "minLength": 1
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

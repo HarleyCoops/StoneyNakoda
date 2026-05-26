@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Dict, Iterable, List, Sequence
+import os
+from typing import Dict, List, Sequence
 
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -16,6 +17,7 @@ from .config import (
     MAX_OUTPUT_RULES_PER_CHUNK,
     ensure_directories,
 )
+from .llm_json import LLMJsonClient, env_flag, load_json_schema
 from .models import GrammarRule, PageChunk
 
 logger = logging.getLogger(__name__)
@@ -39,7 +41,7 @@ For each rule provide:
 - page_number: {chunk.page_number}
 - chunk_id: "{chunk.chunk_id()}"
 
-Return JSON with schema:
+Return only a JSON object with this schema. Do not wrap the JSON in markdown:
 {{
   "rules": [
     {{
@@ -66,7 +68,9 @@ class StoneyGrammarExtractor:
         self,
         model: str = DEFAULT_EXTRACTION_MODEL,
         temperature: float = 0.2,
-        max_output_tokens: int = 2000,
+        max_output_tokens: int = 8000,
+        allow_json_fallback: bool | None = None,
+        response_format_mode: str | None = None,
     ) -> None:
         ensure_directories()
         load_dotenv()
@@ -74,6 +78,18 @@ class StoneyGrammarExtractor:
         self.model = model
         self.temperature = temperature
         self.max_output_tokens = max_output_tokens
+        self.response_format_mode = response_format_mode or os.getenv(
+            "STONEY_EXTRACTION_RESPONSE_FORMAT",
+            "json_prompt",
+        )
+        self.grammar_schema = load_json_schema("grammar_rule.schema.json")
+        self.json_client = LLMJsonClient(
+            self.client,
+            self.model,
+            allow_json_fallback=env_flag("STONEY_ALLOW_JSON_FALLBACK")
+            if allow_json_fallback is None
+            else allow_json_fallback,
+        )
 
     @retry(wait=wait_exponential(multiplier=1, min=2, max=20), stop=stop_after_attempt(3))
     def _call_model(self, prompt: str, chunk: PageChunk) -> Dict:
@@ -90,9 +106,7 @@ class StoneyGrammarExtractor:
                 "image_url": {"url": image_data}
             })
 
-        response = self.client.chat.completions.create(
-            model=self.model,
-            max_completion_tokens=self.max_output_tokens,
+        return self.json_client.create(
             messages=[
                 {
                     "role": "system",
@@ -103,11 +117,11 @@ class StoneyGrammarExtractor:
                     "content": content,
                 },
             ],
+            schema=self.grammar_schema,
+            schema_name="grammar_rule_extraction",
+            max_output_tokens=self.max_output_tokens,
+            response_format_mode=self.response_format_mode,
         )
-        content_text = response.choices[0].message.content
-        if not isinstance(content_text, str):
-            raise ValueError(f"Expected string response, got {type(content_text)}")
-        return json.loads(content_text)
 
     def extract_rules(self, chunks: Sequence[PageChunk]) -> List[GrammarRule]:
         extracted_rules: List[GrammarRule] = []

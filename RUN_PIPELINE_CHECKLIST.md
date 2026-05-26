@@ -10,9 +10,15 @@ This guide captures the exact commands to run each stage of the repository's two
    ```
 2. **Populate environment variables**
    - Confirm `OPENAI_API_KEY` and `GOOGLE_API_KEY` are exported in the shell (or stored in `.env`).
-   - Optionally set `OPENAI_MODEL`, `OPENAI_FINETUNE_MODEL`, `STONEY_EXTRACTION_MODEL`, and `STONEY_TASK_MODEL` to override defaults.
+   - Optionally set `OPENAI_CHAT_MODEL`, `OPENAI_FINETUNE_MODEL`, `OPENAI_EXTRACTION_MODEL`, `OPENAI_TASK_MODEL`, and `GEMINI_QA_MODEL` to override defaults.
+   - Run `python scripts/check_config.py` before paid API calls. `OPENAI_MODEL` is ignored by current code paths.
 3. **Artifacts directory sanity check**
    - Ensure `Dictionaries/`, `OpenAIFineTune/`, and `data/` exist and are writable (the pipeline scripts will create their own sub-directories if needed).
+4. **Governance manifest validation**
+   ```bash
+   python scripts/validate_source_manifest.py
+   ```
+   Training and upload workflows are blocked unless the relevant records in `SOURCE_MANIFEST.yml` are explicitly approved.
 
 ## 1. Dictionary → Fine-tuning pipeline
 
@@ -49,8 +55,8 @@ python openai_finetune.py
 ```
 Expectation:
 - The script validates the presence of the train/valid files and the `OPENAI_API_KEY`.
-- A fine-tuning job is created for the base model defined by `OPENAI_FINETUNE_MODEL`/`OPENAI_MODEL`.
-- Optional Hugging Face dataset publishing and Weights & Biases tracking kick in when the relevant environment variables are set. 【F:openai_finetune.py†L40-L199】
+- A fine-tuning job is created for the base model defined by `OPENAI_FINETUNE_MODEL`; unsupported model names fail before API calls.
+- Hugging Face dataset publishing is disabled unless `HUGGINGFACE_PUBLISH=true`, private by default, and blocked unless the manifest approves public release for the uploaded files. Weights & Biases tracking kicks in when the relevant environment variables are set. 【F:openai_finetune.py†L40-L199】
 
 Document the returned job ID, status transitions, and any API errors (quota, billing, validation failures). If dataset uploads fail, capture the exception message and whether retries were attempted.
 
@@ -64,23 +70,26 @@ python run_stoney_grammar_pipeline.py
 ```
 Pipeline flow:
 1. `pdf_ingest.load_page_assets` renders the source PDF into 127 base64 PNG + text chunks. 【F:stoney_rl_grammar/pdf_ingest.py†L14-L35】
-2. `StoneyGrammarExtractor.extract_rules` calls the Responses API to convert each chunk into structured grammar rules, persisting per-chunk JSON under `data/grammar_extracted_stoney/`. 【F:stoney_rl_grammar/rule_extractor.py†L62-L165】
+2. `StoneyGrammarExtractor.extract_rules` calls Chat Completions using the original prompt-only JSON path for vision extraction, then validates every parsed payload against `schemas/grammar_rule.schema.json` before persisting per-chunk JSON under `data/grammar_extracted_stoney/`. 【F:stoney_rl_grammar/rule_extractor.py†L62-L165】
 3. `RuleOrganizer.organize` filters, deduplicates, and writes curated rules to `data/rl_training_rules_stoney.json`. 【F:stoney_rl_grammar/rule_organizer.py†L17-L81】
 4. `StoneyTaskGenerator.generate_tasks` streams RL-ready tasks to `data/training_datasets_stoney.jsonl`. 【F:stoney_rl_grammar/task_generator.py†L63-L140】
 
-### 2.2 Current blocking failure
+### 2.2 Structured JSON API path
 
-During the extraction stage, the OpenAI Python SDK bundled with the repo rejects the `response_format` argument when calling `client.responses.create`, causing every chunk to fail and the retry loop to exhaust:
-```
-2025-10-29 00:05:48,141 - ERROR - Unable to process page_001_chunk_00: Responses.create() got an unexpected keyword argument 'response_format'
-```
-The error repeats for each page until the run is interrupted. 【d9a4f4†L1-L2】【8b4d30†L1-L16】
+The previous blocker was caused by passing `response_format` to `client.responses.create`. The grammar pipeline now uses a single wrapper, `stoney_rl_grammar/llm_json.py`, with two paths:
 
-Action items while reproducing:
-- Confirm the installed `openai` package version (`pip show openai`). Versions prior to 1.12.0 do not yet accept `response_format`.
-- Option 1: upgrade the SDK (`pip install --upgrade openai`) so `response_format={"type": "json_object"}` is supported.
-- Option 2: remove the `response_format` argument and parse raw JSON manually, but that reintroduces non-JSON responses.
-- Document which option you choose and capture the resulting behavior (successful rule extraction counts or new errors).
+- Vision extraction defaults to `STONEY_EXTRACTION_RESPONSE_FORMAT=json_prompt`, which restores the older working call shape and validates the parsed JSON against `schemas/grammar_rule.schema.json`.
+- Text-only task generation defaults to `STONEY_TASK_RESPONSE_FORMAT=json_schema` and validates against `schemas/rl_task.schema.json`.
+
+Extraction uses an 8,000 completion-token cap by default. A smaller cap caused GPT-5 to return empty content with `finish_reason='length'` on page-level image extraction.
+
+Schema-constrained extraction can be tested explicitly with `STONEY_EXTRACTION_RESPONSE_FORMAT=json_schema`. Strict JSON-object fallback is disabled by default. It can be enabled only for internal compatibility experiments with:
+
+```bash
+STONEY_ALLOW_JSON_FALLBACK=true python run_stoney_grammar_pipeline.py
+```
+
+When reproducing failures, capture the schema-validation error, page/chunk ID, model name, and whether fallback was enabled. Malformed rules or tasks should be rejected rather than silently accepted.
 
 ## 3. Prime Intellect RL gym readiness
 

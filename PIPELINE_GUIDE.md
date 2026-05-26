@@ -55,13 +55,15 @@ source venv/bin/activate  # Windows: venv\Scripts\activate
 
 # Install all dependencies
 pip install -r requirements.txt
+# Install development tools for tests/lint
+pip install -e ".[dev]"
 
 # Configure API keys
 cp .env.example .env
 # Edit .env and add your API keys:
 #   OPENAI_API_KEY=sk-...
 #   GOOGLE_API_KEY=...
-#   HUGGINGFACE_TOKEN=...  (optional, for dataset publishing)
+#   HUGGINGFACE_PUBLISH=true plus HUGGINGFACE_TOKEN=...  (optional, private dataset publishing)
 #   WANDB_API_KEY=...      (optional, for experiment tracking)
 
 # ============================================
@@ -82,7 +84,7 @@ python finetunesetup.py
 
 # Step 3: Fine-tune model via OpenAI
 # Duration: 1-3 hours (OpenAI handles this)
-# Cost: ~$20-50 (GPT-4o-mini, 3 epochs)
+# Cost: depends on allowlisted OPENAI_FINETUNE_MODEL, dataset size, and epochs
 python openai_finetune.py
 # Output: Fine-tuned model ID (printed to console)
 #         Optional: Published to HuggingFace if configured
@@ -251,14 +253,14 @@ StoneyNakoda/
 | Component | Service | Cost Estimate |
 |-----------|---------|---------------|
 | Q&A Generation (150K pairs) | Google Gemini | $5-15 |
-| Fine-tuning (3 epochs, GPT-4o-mini) | OpenAI | $20-50 |
+| Fine-tuning (3 epochs) | OpenAI | Depends on allowlisted model and dataset size |
 | Grammar PDF extraction (vision models) | OpenAI | $10-30 |
 | **Total Pipeline** | | **$35-95** |
 
 **Cost Optimization Tips:**
 - Use `gemini-1.5-flash` instead of `gemini-1.0-pro` for cheaper Q&A generation
 - Reduce Q&A pairs target (change `pairs_per_language` in script)
-- Use `gpt-3.5-turbo` instead of `gpt-4o-mini` for fine-tuning (lower quality)
+- Use `python scripts/check_config.py` to confirm the selected fine-tuning model is allowlisted before paid API calls
 - Consider open-source alternatives like DeepSeek for zero-cost inference
 
 ---
@@ -340,19 +342,20 @@ GOOGLE_API_KEY=...              # Google Gemini API key for Q&A generation
 
 **Optional - Model Overrides:**
 ```bash
-OPENAI_MODEL=gpt-4o-mini                    # Default fine-tuning base model
-OPENAI_FINETUNE_MODEL=gpt-4o-mini          # Override fine-tuning model
-OPENAI_RESPONSES_MODEL=gpt-5               # Override for Responses API (current latest)
-GEMINI_MODEL=gemini-2.0-flash-exp          # Override Gemini model
-STONEY_EXTRACTION_MODEL=gpt-5              # Override grammar extraction model
-STONEY_TASK_MODEL=gpt-5                    # Override task generation model
+OPENAI_CHAT_MODEL=gpt-4.1-mini-2025-04-14          # General chat/default utility model
+OPENAI_FINETUNE_MODEL=gpt-4.1-mini-2025-04-14      # Allowlisted fine-tuning model
+OPENAI_EXTRACTION_MODEL=gpt-5                      # Grammar extraction model
+OPENAI_TASK_MODEL=gpt-5                            # RL task generation model
+GEMINI_QA_MODEL=gemini-2.5-pro                     # Q&A generation model
 ```
 
 **Optional - Integrations:**
 ```bash
+HUGGINGFACE_PUBLISH=false                  # Dataset publishing is opt-in
 HUGGINGFACE_TOKEN=hf_...                   # HuggingFace API token
 HUGGINGFACE_DATASET_REPO=username/stoney   # HF dataset repository
-HUGGINGFACE_DATASET_PRIVATE=true           # Make dataset private
+HUGGINGFACE_DATASET_PRIVATE=true           # Private by default
+ALLOW_PUBLIC_DATASET_UPLOAD=false          # Must be true for public uploads
 
 WANDB_API_KEY=...                          # Weights & Biases API key
 WANDB_PROJECT=stoney-nakoda                # W&B project name

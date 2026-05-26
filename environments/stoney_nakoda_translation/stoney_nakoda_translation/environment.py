@@ -206,7 +206,7 @@ class StoneyTranslationRubric(Rubric):
             self.pattern_reward,
         ]
         weights = [0.6, 0.3, 0.1]
-        super().__init__(funcs=funcs, weights=weights, parser=parser, parallelize_scoring=False)
+        super().__init__(funcs=funcs, weights=weights, parser=parser)
 
     def _prediction(self, completion: vf.types.Messages, parser: Parser) -> str:
         response = parser.parse_answer(completion) or ""

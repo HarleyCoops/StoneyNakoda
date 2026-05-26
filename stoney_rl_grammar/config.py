@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-import os
 from pathlib import Path
+
+from stoney_config import load_stoney_config
 
 # Base directories
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -19,9 +20,9 @@ RL_RULES_OUTPUT_PATH = DATA_DIR / "rl_training_rules_stoney.json"
 TASK_DATASET_OUTPUT_PATH = DATA_DIR / "training_datasets_stoney.jsonl"
 
 # Models and tuning defaults
-DEFAULT_RESPONSES_MODEL = os.getenv("OPENAI_RESPONSES_MODEL") or os.getenv("OPENAI_MODEL") or "gpt-5"
-DEFAULT_EXTRACTION_MODEL = os.getenv("STONEY_EXTRACTION_MODEL", DEFAULT_RESPONSES_MODEL)
-DEFAULT_TASK_MODEL = os.getenv("STONEY_TASK_MODEL", DEFAULT_RESPONSES_MODEL)
+_CONFIG = load_stoney_config(validate_finetune=False)
+DEFAULT_EXTRACTION_MODEL = _CONFIG.openai_extraction_model
+DEFAULT_TASK_MODEL = _CONFIG.openai_task_model
 
 # Operational parameters
 MAX_CHARS_PER_CHUNK = 2200
