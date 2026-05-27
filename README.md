@@ -23,10 +23,46 @@ The dictionary fine-tuning path was verified end-to-end on May 26, 2026:
 
 - Hugging Face dataset publishing succeeded for `HarleyCooper/Stoney10kRL`.
 - OpenAI training and validation file upload succeeded.
-- Supervised fine-tuning on `gpt-4.1-2025-04-14` succeeded.
-- Weights & Biases telemetry synced for the run.
+- Supervised fine-tuning on `gpt-4.1-2025-04-14` succeeded for both the smoke test and the fresh 10K dataset run.
+- Weights & Biases telemetry synced, with the OpenAI result CSV backfilled into the run after completion.
 
-Baseline fine-tune:
+Fresh 10K base-model fine-tune:
+
+| Field | Value |
+| --- | --- |
+| Job ID | `ftjob-Gml78VqY64qOS9rFOaqh7DH5` |
+| Output model | `ft:gpt-4.1-2025-04-14:personal::DjvNzO3U` |
+| Base model | `gpt-4.1-2025-04-14` |
+| Training method | Supervised |
+| Training examples | 8,000 |
+| Validation examples | 2,000 |
+| Trained tokens | 3,471,108 |
+| Epochs | 3 |
+| Batch size | 16 |
+| LR multiplier | 2 |
+| Seed | 502325896 |
+| Training steps | 1,500 |
+| Final train loss | 0.8930 |
+| Final validation loss | 1.1135 |
+| Full validation loss | 1.0057 |
+| Final train token accuracy | 0.7329 |
+| Final validation token accuracy | 0.6979 |
+| Full validation token accuracy | 0.7193 |
+| Best validation loss | 0.8394 at step 600 |
+| Best validation token accuracy | 0.7500 at step 600 |
+| Hugging Face dataset | [`HarleyCooper/Stoney10kRL`](https://huggingface.co/datasets/HarleyCooper/Stoney10kRL) |
+| W&B run | [`christian-cooper-us/stoney-finetuning/h7li6426`](https://wandb.ai/christian-cooper-us/stoney-finetuning/runs/h7li6426) |
+| W&B artifact | `openai-finetune-10k-base-results:v0` |
+
+W&B panels to inspect for this run:
+
+- `openai/train_loss` vs `openai/step`
+- `openai/train_accuracy` vs `openai/step`
+- `openai/valid_loss` vs `openai/step`
+- `openai/valid_mean_token_accuracy` vs `openai/step`
+- `openai/validation_points` table for the 15 validation checkpoints
+
+Smoke-test fine-tune:
 
 | Field | Value |
 | --- | --- |
@@ -51,10 +87,10 @@ Baseline fine-tune:
 
 Run notes:
 
-- This was a successful pipeline smoke test, not the final fresh 10,000-pair model.
-- The completed fine-tune used the pre-existing `OpenAIFineTune/stoney_train.jsonl` and `OpenAIFineTune/stoney_valid.jsonl` split, last written before the May 26 fresh generation run.
-- The fresh `Dictionaries/bilingual_training_set_v2.jsonl` generation was still running during the smoke test. After it reaches the intended 10,000 valid Q&A rows, rerun `python finetunesetup.py`, republish the updated split, and launch the corrected fresh-10K fine-tune.
+- The first completed fine-tune was a successful pipeline smoke test. It used the pre-existing `OpenAIFineTune/stoney_train.jsonl` and `OpenAIFineTune/stoney_valid.jsonl` split, last written before the May 26 fresh generation run.
+- The corrected fresh run waited for `Dictionaries/bilingual_training_set_v2.jsonl` to reach 10,000 valid Q&A rows, reran `python finetunesetup.py` to rebuild the 8,000/2,000 split, republished the split to Hugging Face, and launched a new fine-tune from the clean base model.
 - The $94.88 fine-tune spend consumed the available OpenAI credits during the concurrent grammar task-generation run, which produced temporary 429/quota failures. Credits were topped up before continuing the full run.
+- W&B initially appeared blank because the live pipeline logged status fields but not the OpenAI result CSV. The run was backfilled with all 1,500 result rows and the decoded result CSV was published as a W&B artifact.
 
 Operational guardrail:
 
