@@ -17,7 +17,7 @@ numpy>=2.2.6        # Numerical operations
 pandas>=2.3.3        # Data manipulation
 
 # PDF parsing for grammar extraction
-pypdf>=6.13.2         # PDF parsing
+pypdf>=6.13.3         # PDF parsing
 pymupdf>=1.24.0      # Render PDF pages to images
 
 # Utility packages
