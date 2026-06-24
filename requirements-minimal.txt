@@ -17,7 +17,7 @@ numpy>=2.2.6        # Numerical operations
 pandas>=2.3.3        # Data manipulation
 
 # PDF parsing for grammar extraction
-pypdf>=6.13.3         # PDF parsing
+pypdf>=6.14.2         # PDF parsing
 pymupdf>=1.24.0      # Render PDF pages to images
 
 # Utility packages
@@ -29,7 +29,7 @@ tenacity>=8.2.0      # Resilient retries for API calls
 huggingface_hub>=0.24.0  # Publishing datasets/models to Hugging Face
 
 # Prime Intellect RL environment
-verifiers>=0.1.15.dev187  # Prime Intellect environment scaffolding
+verifiers>=0.1.15.dev189  # Prime Intellect environment scaffolding
 
 # Optional: Experiment tracking (commented out for speed)
 # wandb>=0.17.0
